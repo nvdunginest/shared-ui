@@ -1,0 +1,69 @@
+{
+  "name": "@ptht365/shared-ui",
+  "version": "1.0.0",
+  "description": "Shared UI component library for ptht365 micro-frontend apps",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@ant-design/colors": ">=7.0.0",
+    "@ant-design/icons": ">=5.0.0",
+    "@ckeditor/ckeditor5-react": ">=8.0.0",
+    "@react-pdf-viewer/core": ">=3.12.0",
+    "@react-pdf-viewer/toolbar": ">=3.12.0",
+    "@react-pdf-viewer/zoom": ">=3.12.0",
+    "antd": ">=5.0.0",
+    "axios": ">=1.0.0",
+    "ckeditor5": ">=42.0.0",
+    "dayjs": ">=1.0.0",
+    "jwt-decode": ">=4.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-router-dom": ">=6.0.0",
+    "styled-components": ">=6.0.0"
+  },
+  "devDependencies": {
+    "@ant-design/colors": "^7.1.0",
+    "@ant-design/icons": "^5.3.7",
+    "@ckeditor/ckeditor5-react": "8.0.0",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/toolbar": "^3.12.0",
+    "@react-pdf-viewer/zoom": "^3.12.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/styled-components": "^5.1.34",
+    "antd": "^5.21.0",
+    "axios": "^1.7.2",
+    "ckeditor5": "42.0.2",
+    "dayjs": "^1.11.19",
+    "jwt-decode": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0",
+    "styled-components": "^6.0.9",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
