@@ -52,7 +52,7 @@
     "@types/react-dom": "^18.0.0",
     "@types/styled-components": "^5.1.34",
     "antd": "^5.21.0",
-    "axios": "^1.7.2",
+    "axios": "1.13.4",
     "ckeditor5": "42.0.2",
     "dayjs": "^1.11.19",
     "jwt-decode": "^4.0.0",

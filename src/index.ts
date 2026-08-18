@@ -19,6 +19,7 @@ export type {
 } from "./platform/contexts/AppContext/type";
 
 export { default as axiosBuilder, getBaseUrl } from "./platform/axios.instance";
+export type { InstanceFactory } from "./platform/axios.instance";
 export { default as appController } from "./platform/controllers/app.controller";
 export { default as filesController } from "./platform/controllers/files.controller";
 export { default as usersController } from "./platform/controllers/users.controller";

@@ -1,13 +1,13 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+
+/** Factory provided by the host. Creates a fully-configured instance for a given baseUrl. */
+export type InstanceFactory = (baseUrl: string) => AxiosInstance;
 
 interface AxiosBuilderConfig {
   baseUrl: string;
-  /** URL endpoint để refresh token. Mặc định: `{baseUrl}/api/v1/soffice/token/refresh-token` */
-  tokenRefreshUrl?: string;
 }
 
 let _baseUrl = "";
-let _tokenRefreshUrl = "";
 
 export function getBaseUrl(): string {
   return _baseUrl;
@@ -16,12 +16,11 @@ export function getBaseUrl(): string {
 class AxiosBuilder {
   private static instance: AxiosBuilder;
   private _getAccessToken: () => string | null | Promise<string | null>;
-  private _getRefreshToken: () => string | null | Promise<string | null>;
-  private _isAccessTokenConfigured: boolean = false;
+  private _instanceFactory: InstanceFactory | null = null;
+  private _axiosInstance: AxiosInstance | null = null;
 
   private constructor() {
     this._getAccessToken = () => window.sessionStorage.getItem("access_token");
-    this._getRefreshToken = () => window.localStorage.getItem("refresh_token");
   }
 
   public static getSingletonInstance(): AxiosBuilder {
@@ -31,97 +30,86 @@ class AxiosBuilder {
     return AxiosBuilder.instance;
   }
 
-  /**
-   * Cấu hình base URL cho tất cả API calls.
-   * Phải được gọi TRƯỚC khi mount bất kỳ component nào từ shared-ui.
-   *
-   * @example
-   * axiosBuilder.configure({
-   *   baseUrl: `${import.meta.env.PUBLIC_APP_API_HOSTNAME}${import.meta.env.PUBLIC_APP_BASE_URI}`,
-   * });
-   */
+  /** Called by each mini-app on mount to set its own backend baseUrl. */
   public configure(config: AxiosBuilderConfig): void {
     _baseUrl = config.baseUrl;
-    _tokenRefreshUrl =
-      config.tokenRefreshUrl ??
-      `${config.baseUrl.split("/api/")[0]}/api/v1/soffice/token/refresh-token`;
+    this._axiosInstance = null;
   }
 
+  /**
+   * Token getter used by AppLoader to decode JWT for userId.
+   * Called once by the host at startup.
+   */
   public configureGetAccessToken(
     fn: () => string | null | Promise<string | null>
   ): void {
     this._getAccessToken = fn;
-    this._isAccessTokenConfigured = true;
   }
 
-  public configureGetRefreshToken(
-    fn: () => string | null | Promise<string | null>
-  ): void {
-    this._getRefreshToken = fn;
+  /**
+   * Factory provided by the host at startup, before any mini-app mounts.
+   * Owns all auth logic: token injection, 401 handling, refresh.
+   */
+  public configureInstanceFactory(fn: InstanceFactory): void {
+    this._instanceFactory = fn;
+    this._axiosInstance = null;
   }
 
   public async getAccessToken(): Promise<string | null> {
     return await this._getAccessToken();
   }
 
-  public async getRefreshToken(): Promise<string | null> {
-    return await this._getRefreshToken();
+  /**
+   * Create an auth-wired instance for an arbitrary baseUrl.
+   * Used by mini-apps that need to call a second external service
+   * (e.g. an external API with a different baseUrl than the main one).
+   */
+  public createInstance(baseUrl: string): AxiosInstance {
+    return this._instanceFactory
+      ? this._instanceFactory(baseUrl)
+      : this._createFallbackInstance(baseUrl);
   }
 
-  public async getInstance(config?: AxiosRequestConfig) {
-    const token = await this.getAccessToken();
-    const defaultConfig: AxiosRequestConfig = {
-      ...config,
-      baseURL: _baseUrl,
-      timeout: 600000,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const instance = axios.create(defaultConfig);
-
-    if (!this._isAccessTokenConfigured) {
-      const refreshToken = async () => {
-        return axios.post(_tokenRefreshUrl, {
-          refreshToken: await this.getRefreshToken(),
-        });
-      };
-
-      instance.interceptors.response.use(
-        (response) => response,
-        async (error) => {
-          const code = error.response?.status;
-          if (code === 401) {
-            return refreshToken()
-              .then((rs) => {
-                const { access_token, refresh_token } = rs.data;
-                instance.defaults.headers.common["Authorization"] =
-                  `Bearer ${access_token}`;
-                sessionStorage.setItem("access_token", access_token);
-                localStorage.setItem("refresh_token", refresh_token);
-                const config = error.config;
-                if (config.headers !== undefined) {
-                  config.headers["Authorization"] = `Bearer ${access_token}`;
-                  return instance(config);
-                } else {
-                  sessionStorage.removeItem("access_token");
-                  localStorage.removeItem("refresh_token");
-                  window.location.reload();
-                  return null;
-                }
-              })
-              .catch(() => {
-                sessionStorage.removeItem("access_token");
-                localStorage.removeItem("refresh_token");
-                window.location.reload();
-              });
-          }
-          return Promise.reject(error);
-        }
-      );
+  public async getInstance(config?: AxiosRequestConfig): Promise<AxiosInstance> {
+    if (!this._axiosInstance) {
+      this._axiosInstance = this.createInstance(_baseUrl);
     }
+
+    if (config) {
+      return axios.create({ ...this._axiosInstance.defaults, ...config });
+    }
+
+    return this._axiosInstance;
+  }
+
+  /**
+   * Minimal fallback when no factory is configured (standalone, no host).
+   * Injects token but has no refresh — dispatches "auth-expired" on 401.
+   */
+  private _createFallbackInstance(baseUrl: string): AxiosInstance {
+    const instance = axios.create({
+      baseURL: baseUrl,
+      timeout: 600000,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    instance.interceptors.request.use(async (config) => {
+      const token = await this.getAccessToken();
+      if (token && config.headers) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          window.dispatchEvent(new Event("auth-expired"));
+        }
+        return Promise.reject(error);
+      }
+    );
 
     return instance;
   }

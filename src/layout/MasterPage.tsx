@@ -1,10 +1,9 @@
 import React, { FC, PropsWithChildren, useEffect, useState } from "react";
 
-import { ArrowLeftOutlined, MenuFoldOutlined, ReloadOutlined } from "@ant-design/icons";
+import { MenuFoldOutlined } from "@ant-design/icons";
 import { useAppContext } from "../platform/contexts/AppContext";
-import { Button, Drawer, Tooltip, Typography } from "antd";
+import { Button, Drawer, Typography } from "antd";
 import { styled } from "styled-components";
-import { useNavigate } from "react-router-dom";
 
 import ResponsiveWrapper from "./ResponsiveWrapper";
 import { useDeviceType } from "./useDeviceType";
@@ -17,7 +16,6 @@ type Props = PropsWithChildren & {
   mobile?: React.ReactNode;
   extra?: React.ReactNode;
   headerActions?: React.ReactNode;
-  onRefresh?: () => void;
 };
 
 const MasterPage: FC<Props> = function ({
@@ -26,11 +24,9 @@ const MasterPage: FC<Props> = function ({
   mobile,
   extra,
   headerActions,
-  onRefresh,
   children,
 }: Props) {
   const { setPageTitle, state } = useAppContext();
-  const navigate = useNavigate();
   const deviceType = useDeviceType();
   const [showDrawer, setShowDrawer] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
@@ -53,25 +49,6 @@ const MasterPage: FC<Props> = function ({
   return (
     <ContainerStl>
       <HeaderStl>
-        <Tooltip title="Quay lại" placement="bottomLeft">
-          <Button
-            type="primary"
-            shape="circle"
-            size="small"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
-            danger
-          />
-        </Tooltip>
-        <Tooltip title="Làm mới" placement="bottomRight">
-          <Button
-            type="default"
-            shape="circle"
-            size="small"
-            icon={<ReloadOutlined />}
-            onClick={() => (onRefresh ? onRefresh() : navigate(0))}
-          />
-        </Tooltip>
         <TitleStl>
           <Typography.Title
             style={{

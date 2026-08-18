@@ -12,6 +12,10 @@ import {
   CodeBlock,
   Essentials,
   Font,
+  FontFamily,
+  FontSize,
+  FontColor,
+  FontBackgroundColor,
   Heading,
   Image,
   ImageCaption,
@@ -58,6 +62,7 @@ const CustomEditor = forwardRef<EditorRef, Props>(
 
     return (
       <WrapperStl>
+        <div>abc</div>
         <CKEditor
           editor={ClassicEditor}
           disabled={disable}
@@ -83,9 +88,14 @@ const CustomEditor = forwardRef<EditorRef, Props>(
             },
             table: { contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"] },
             list: { properties: { styles: true, startIndex: true } },
+            fontSize: {
+              options: [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72],
+              supportAllValues: true,
+            },
             plugins: [
               Essentials, Bold, Italic, Paragraph, Undo, Image, ImageUpload, ImageInsert,
-              ImageToolbar, ImageCaption, ImageStyle, ImageResize, Heading, Font, Superscript,
+              ImageToolbar, ImageCaption, ImageStyle, ImageResize, Heading, Font, FontFamily,
+              FontSize, FontColor, FontBackgroundColor, Superscript,
               Subscript, Strikethrough, Code, Link, BlockQuote, CodeBlock, Alignment, List,
               AutoLink, TodoList, Indent, Table, TableToolbar, Base64UploadAdapter,
             ],
