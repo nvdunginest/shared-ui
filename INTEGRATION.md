@@ -144,6 +144,43 @@ axiosBuilder.configure({
 });
 ```
 
+## 4b. Deep-import shared-resource entry points (shared-users, shared-departments)
+
+Ngoài barrel chính (`@ptht365/shared-ui`), package còn có các entry point **riêng, nhẹ**
+(không kéo theo antd/ckeditor5/AppContext) để đọc dữ liệu do shell fetch và cache dùng chung:
+`@ptht365/shared-ui/shared-users`, `@ptht365/shared-ui/shared-departments`.
+
+**Mỗi entry point PHẢI được khai báo thêm 1 dòng `singleton: true` riêng** trong MF `shared`
+config — deep import không tự động ăn theo entry gốc `@ptht365/shared-ui`:
+
+```ts
+// rsbuild.config.ts
+shared: {
+  "@ptht365/shared-ui": { singleton: true, requiredVersion: false },
+  "@ptht365/shared-ui/shared-users": { singleton: true, requiredVersion: false },
+  "@ptht365/shared-ui/shared-departments": { singleton: true, requiredVersion: false },
+}
+```
+
+**Ai cấu hình client, ai chỉ đọc?**
+- **Shell app**: gọi `configureSharedUsersClient({ httpClient })` / `configureSharedDepartmentsClient({ httpClient })`
+  một lần lúc khởi động để đăng ký axios instance + endpoint mặc định. Với `users`, shell còn tự
+  gọi thêm `fetchSharedUsers()` eager (vì shell cần data này ngay cho logic riêng của nó). Với
+  `departments` (và các resource sau này), shell **chỉ configure, không fetch** — fetch để lazy,
+  mini app nào cần mới trigger.
+- **Mini app**: KHÔNG cần gọi `configure...()` khi chỉ chạy trong shell — chỉ cần gọi hook, ví dụ:
+
+```tsx
+import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
+import { useSharedDepartments } from "@ptht365/shared-ui/shared-departments";
+
+const { users } = useSharedUsers();
+const { departments } = useSharedDepartments(); // toàn bộ tenant — tự filter theo companyId nếu cần
+```
+
+Nếu mini app không mount component nào gọi `useSharedDepartments()`, sẽ không có request
+`/departments` nào được gửi trong phiên đó.
+
 ## 5. Cấu hình alias (rsbuild.config.ts)
 
 Có thể giữ nguyên alias để không phải đổi toàn bộ import trong codebase:

@@ -39,10 +39,45 @@ src/
   layout/             # App shell components
     desktop/          # DesktopLayout + Navigation + NavItem + AppInfo
     mobile/           # MobileLayout + Navigation + NavItem + MoreButton
+  shared-resource/    # Generic engine behind every shared-* deep-import entry point
+    createSharedResource.ts   # module-level store + useSyncExternalStore + staleTime/dedupe
+  shared-users/       # Deep-import entry: useSharedUsers() — see "Shared-resource entry points" below
+  shared-departments/ # Deep-import entry: useSharedDepartments() — same pattern, full tenant list
   assets/             # Images bundled as data URLs (see tsup.config.ts)
   utils.ts            # Pure utility functions (formatting, Vietnamese text, etc.)
   declarations.d.ts   # Global type declarations
 ```
+
+### Shared-resource entry points (`shared-users`, `shared-departments`, ...)
+
+These are standalone deep-import entries (`@ptht365/shared-ui/shared-users`, `@ptht365/shared-ui/shared-departments`)
+— NOT re-exported from the main barrel (`src/index.ts`) — so a minimal consumer can pull in just
+a ~1-3KB module without the antd/ckeditor5/AppContext weight of the default entry.
+
+All of them are thin, resource-typed wrappers around `createSharedResource<T>()`
+(`src/shared-resource/createSharedResource.ts`), which owns the actual mechanics: a
+module-level store (`useSyncExternalStore`), a staleTime-based cache (default 5 min), and
+in-flight request dedupe so concurrent mounts don't fire duplicate HTTP calls. Each call to
+`createSharedResource()` closes over its own independent store — one per entry file.
+
+**Design intent**: the shell app owns fetching (calls `configureXClient()` + optionally
+`fetchX()` once at startup); mini apps just call `useSharedX()` wherever they need the data —
+if a mini app never renders a component that calls the hook, no HTTP request for that resource
+is ever made in that session (shell-provided, mini-app-consumed-lazily). Whichever caller
+mounts first actually triggers the fetch; every other mount (same app or a different one, as
+long as the module is loaded once as an MF singleton) reads the shared cache and re-renders
+when it updates.
+
+**Fit constraint**: this engine only fits resources fetched as ONE flat list with no *required*
+request parameter (e.g. `/users`, `/departments` with no `companyId`). A resource whose backend
+mandates a scoping param has no place to key a per-param cache here — fetch its unscoped "all"
+variant and filter client-side (that's what `shared-departments` does: the backend's `companyId`
+query param is optional and returns the whole tenant's departments when omitted).
+
+Adding a new one = 1 file: call `createSharedResource<T>({ defaultEndpoint })`, re-export
+`configure/fetch/get.../clear...` renamed for the resource, and wrap `useResource` to rename
+its generic `data` field to something resource-specific (`users`, `departments`, ...). Then
+register the new entry in `tsup.config.ts` (`entry`) and `package.json` (`exports`).
 
 ### Key design decisions
 

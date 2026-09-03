@@ -1,7 +1,11 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: {
+    index: "src/index.ts",
+    "shared-users": "src/shared-users/index.ts",
+    "shared-departments": "src/shared-departments/index.ts",
+  },
   format: ["esm", "cjs"],
   dts: true,
   splitting: true,

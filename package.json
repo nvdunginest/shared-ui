@@ -1,6 +1,6 @@
 {
   "name": "@ptht365/shared-ui",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Shared UI component library for ptht365 micro-frontend apps",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -11,6 +11,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./shared-users": {
+      "types": "./dist/shared-users.d.ts",
+      "import": "./dist/shared-users.js",
+      "require": "./dist/shared-users.cjs"
+    },
+    "./shared-departments": {
+      "types": "./dist/shared-departments.d.ts",
+      "import": "./dist/shared-departments.js",
+      "require": "./dist/shared-departments.cjs"
     }
   },
   "files": [
