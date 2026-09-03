@@ -16,11 +16,6 @@
       "types": "./dist/shared-users.d.ts",
       "import": "./dist/shared-users.js",
       "require": "./dist/shared-users.cjs"
-    },
-    "./shared-departments": {
-      "types": "./dist/shared-departments.d.ts",
-      "import": "./dist/shared-departments.js",
-      "require": "./dist/shared-departments.cjs"
     }
   },
   "files": [
