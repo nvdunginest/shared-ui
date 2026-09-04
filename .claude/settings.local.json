@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk grep *)",
+      "Bash(rtk npm *)",
+      "Bash(rtk tsc *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk read *)",
+      "Bash(npm install *)",
+      "Bash(npm link *)",
+      "Bash(node -e \"console.log\\(require\\('/Users/nvdung/Repos/ptht365/vpi-sys-soff/node_modules/axios/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('/Users/nvdung/Repos/ptht365/shared-ui/node_modules/axios/package.json'\\).version\\)\")"
+    ]
+  }
+}
