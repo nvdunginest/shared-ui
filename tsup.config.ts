@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "shared-users": "src/shared-users/index.ts",
+    platform: "src/platform/index.ts",
   },
   format: ["esm", "cjs"],
   dts: true,
