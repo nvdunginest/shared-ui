@@ -5,6 +5,8 @@ export default defineConfig({
     index: "src/index.ts",
     "shared-users": "src/shared-users/index.ts",
     platform: "src/platform/index.ts",
+    "module-contract": "src/module-contract/index.ts",
+    "dev-shell": "src/dev-shell/index.ts",
   },
   format: ["esm", "cjs"],
   dts: true,

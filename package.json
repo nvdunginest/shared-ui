@@ -1,6 +1,6 @@
 {
   "name": "@ptht365/shared-ui",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Shared UI component library for ptht365 micro-frontend apps",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -21,6 +21,16 @@
       "types": "./dist/shared-users.d.ts",
       "import": "./dist/shared-users.js",
       "require": "./dist/shared-users.cjs"
+    },
+    "./module-contract": {
+      "types": "./dist/module-contract.d.ts",
+      "import": "./dist/module-contract.js",
+      "require": "./dist/module-contract.cjs"
+    },
+    "./dev-shell": {
+      "types": "./dist/dev-shell.d.ts",
+      "import": "./dist/dev-shell.js",
+      "require": "./dist/dev-shell.cjs"
     }
   },
   "files": [
@@ -31,6 +41,10 @@
     "build": "tsup",
     "build:watch": "tsup --watch",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "check:exports": "node scripts/check-exports.mjs",
+    "check:isolation": "node scripts/check-entry-isolation.mjs",
+    "check": "npm run type-check && npm run test && npm run build && npm run check:exports && npm run check:isolation",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -40,7 +54,7 @@
     "@react-pdf-viewer/core": ">=3.12.0",
     "@react-pdf-viewer/toolbar": ">=3.12.0",
     "@react-pdf-viewer/zoom": ">=3.12.0",
-    "antd": ">=5.0.0",
+    "antd": ">=5.12.0",
     "axios": ">=1.0.0",
     "ckeditor5": ">=42.0.0",
     "dayjs": ">=1.0.0",
@@ -57,7 +71,7 @@
     "@react-pdf-viewer/core": "3.12.0",
     "@react-pdf-viewer/toolbar": "3.12.0",
     "@react-pdf-viewer/zoom": "3.12.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.20.5",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/styled-components": "^5.1.34",
@@ -65,6 +79,7 @@
     "axios": "1.13.4",
     "ckeditor5": "42.0.2",
     "dayjs": "^1.11.19",
+    "jsdom": "^30.1.1",
     "jwt-decode": "^4.0.0",
     "pdfjs-dist": "3.4.120",
     "react": "^18.2.0",
@@ -72,7 +87,8 @@
     "react-router-dom": "^6.8.0",
     "styled-components": "^6.0.9",
     "tsup": "^8.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^5.0.3"
   },
   "publishConfig": {
     "access": "public"
