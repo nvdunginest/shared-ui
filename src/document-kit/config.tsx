@@ -1,6 +1,10 @@
+import type { UUID } from "crypto";
 import { ComponentType, createContext, FC, PropsWithChildren, useContext } from "react";
 
 import type { IFeature } from "../platform-kit";
+
+import type { ActivityRenderConfig } from "./helpers/activities.helper";
+import type { DocumentBase } from "./models/DocumentBase";
 
 import type { TabKey } from "./context/list/type";
 import type PaginationQueryResult from "./models/PaginationQueryResult";
@@ -38,6 +42,46 @@ export type TabConfig = {
   hasProjectFilter?: boolean;
 };
 
+/** The backend calls the detail screen makes on a document (the app's documents controller satisfies it). */
+export type DocumentActionApi = {
+  getById(id: UUID): Promise<DocumentBase>;
+  dismissRemind(id: UUID): Promise<unknown>;
+  transfer(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  approve(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  reject(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  cancel(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  giveback(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  returnToSubmitter(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+};
+
+/** Which statuses allow what: the business rules that differ from one app to the other. */
+export type DocumentStatusRules = {
+  draft: number;
+  /** The processor may approve, reject or give back (e.g. PROCESSING, plus VIEWED where that status exists). */
+  processing: number[];
+  /** Attachments and transfer are possible (not ended yet). */
+  notEnded: number[];
+  /** The creator or processor may still cancel it. */
+  cancelable: number[];
+  /** Comments are accepted. */
+  canComment: number[];
+  /** Ended but still commentable: only private comments are accepted. Empty where ended documents are closed. */
+  finished: number[];
+};
+
+export type DocumentDetailConfig = {
+  api: DocumentActionApi;
+  statuses: DocumentStatusRules;
+  wording: {
+    /** The approval verb ("phê duyệt", "chỉ đạo"): button, dialog and messages. */
+    approveVerb: string;
+    /** Name of the approval level ("cấp duyệt", "cấp phê duyệt"). */
+    tierName: string;
+  };
+  /** History wording per activity type. */
+  activities: ActivityRenderConfig[];
+};
+
 export type DocumentKitConfig = {
   /** localStorage key of the remembered company; keep it stable per app. */
   companyStorageKey: string;
@@ -57,6 +101,8 @@ export type DocumentKitConfig = {
     /** "scopes": principal positions with covered sectors; "ids": plain principal position ids. */
     principalPositions: "scopes" | "ids";
   };
+  /** Detail screen of one document (actions, discussion, attachments, history). */
+  detail: DocumentDetailConfig;
   features: {
     /** On a wide frame at "/", open the first document of the list once per entry into the module. */
     autoOpenFirst: boolean;
