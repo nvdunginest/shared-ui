@@ -187,3 +187,14 @@ Backends, the shell (`vpi-sys-soff`), the other mini-apps in `mini-apps/` (more 
 ## 9. Reproducing the analysis
 
 The analysis used throw-away scripts (hash by path, `difflib` ratio per same-path file, `diff | grep -c` for the spot checks). If the plan is approved they should be turned into `scripts/check-duplication.mjs` in this repo (Phase 0) so the figures can be refreshed.
+
+
+## idoc / odoc update (2026-10-22)
+
+Phases 1-3 were applied to `vpi-adm-idoc` and `vpi-adm-odoc` (theme, mdms, platform-kit, signalr, ui, utils, editor, file-viewer), all on `main`.
+Differences kept on purpose: idoc keeps its own status chip palette (processing amber, approved green; the shared one is the reverse),
+and `departmentsController` in the kit gained `getAllDepartments` and an optional `companyId` for them.
+
+Phases 4-5 (document-kit list and detail) are **not** applied: their list and detail screens carry concepts the kit has no place for yet
+(clerk/staff view mode with `ClerkRoleSync` and `RoleModeGate`, role-gated scope tabs, awaiting counts, category/issuer/recipient filters,
+category and issuer in the global state, different create/edit forms). They need a kit extension design first.
