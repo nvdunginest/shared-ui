@@ -10,6 +10,7 @@ export const colors = {
   primaryActive: "#A84820",
   primaryBg: "#FEF3EB", // light hover/selected background
   primaryBorder: "#FCDCB5", // chip/pill border on primary-tinted bg
+  tableHeaderBg: "#934B22", // header row of the editable form tables
 
   danger: "#D33333",
   dangerHover: "#A82626",

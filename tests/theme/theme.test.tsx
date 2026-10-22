@@ -9,6 +9,7 @@ import { colors, POPOVER_CONTENT_WIDTH, StyleProvider, surfaceCard } from "../..
 describe("theme entry", () => {
   it("keeps the brand colour every app shipped with", () => {
     expect(colors.primary).toBe("#C05621");
+    expect(colors.tableHeaderBg).toBe("#934B22");
   });
 
   it("exposes the css mixins and the popover width", () => {

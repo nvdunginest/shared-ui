@@ -9,6 +9,7 @@ export * from "./contexts/AppContext";
 export { default as appController } from "./controllers/app.controller";
 export { default as filesController } from "./controllers/files.controller";
 export { default as userRolesController } from "./controllers/userRoles.controller";
+export type { AddModModel } from "./controllers/userRoles.controller";
 export { default as usersController } from "./controllers/users.controller";
 export { default as filesHelper } from "./helpers/files.helper";
 export * from "./helpers/userRoles.helper";
