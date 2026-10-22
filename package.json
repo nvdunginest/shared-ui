@@ -71,6 +71,11 @@
       "types": "./dist/file-viewer.d.ts",
       "import": "./dist/file-viewer.js",
       "require": "./dist/file-viewer.cjs"
+    },
+    "./document-kit": {
+      "types": "./dist/document-kit.d.ts",
+      "import": "./dist/document-kit.js",
+      "require": "./dist/document-kit.cjs"
     }
   },
   "files": [

@@ -5,7 +5,7 @@
 //          (contract 1, 9.4): no relative import, no shared chunk (tsup `splitting` would tie the entry to the barrel).
 //  light   entries (ui, theme, mdms): may share chunks with each other, but everything reachable from the entry
 //          (following relative imports) must stay free of the heavy packages (CKEditor, PDF viewer...).
-//  heavy   entries (editor, file-viewer, document-kit): no restriction here; they are shared through the shell.
+//  heavy   entries (editor, file-viewer): no restriction here; they are shared through the shell.
 //
 // An entry listed below that is not built yet is only reported (planned entries are checked as soon as they exist).
 import { existsSync, readFileSync } from "node:fs";
@@ -28,12 +28,12 @@ const POLICY = [
   { entry: "ui", mode: "light" },
   { entry: "platform-kit", mode: "light" },
   { entry: "signalr", mode: "light" },
+  { entry: "document-kit", mode: "light" },
   { entry: "theme", mode: "light" },
   { entry: "utils", mode: "light" },
   { entry: "mdms", mode: "light" },
   { entry: "editor", mode: "heavy" },
   { entry: "file-viewer", mode: "heavy" },
-  { entry: "document-kit", mode: "heavy" },
 ];
 
 const problems = [];

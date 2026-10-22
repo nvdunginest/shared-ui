@@ -1,6 +1,6 @@
 // Light entry (bundled into each app): presentational components and layout pieces shared by the document apps.
 // Per-app wording and storage keys come from configureUi().
-export { configureUi } from "./config";
+export { configureUi, getUiConfig } from "./config";
 export type { UiConfig } from "./config";
 export { default as DebugFrameLabel } from "./components/DebugFrameLabel";
 export { default as ExpandingTabBar } from "./components/ExpandingTabBar";

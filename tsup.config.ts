@@ -13,6 +13,7 @@ export default defineConfig({
     signalr: "src/signalr/index.ts",
     utils: "src/text-utils/index.ts",
     ui: "src/ui/index.ts",
+    "document-kit": "src/document-kit/index.ts",
     editor: "src/editor/index.ts",
     "file-viewer": "src/file-viewer/index.ts",
   },

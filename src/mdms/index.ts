@@ -15,3 +15,4 @@ export { default as secretariesController } from "./controllers/secretaries.cont
 export { default as sectorsController } from "./controllers/sectors.controller";
 export { default as tiersController } from "./controllers/tiers.controller";
 export * from "./helpers/actor.helper";
+export { formatProjectLabel, getProjectDisplay, sortByProjectCode, UNKNOWN_LABEL } from "./helpers/project.helper";
