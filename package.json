@@ -51,6 +51,16 @@
       "types": "./dist/signalr.d.ts",
       "import": "./dist/signalr.js",
       "require": "./dist/signalr.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
+      "require": "./dist/ui.cjs"
     }
   },
   "files": [

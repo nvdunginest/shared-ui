@@ -29,6 +29,7 @@ const POLICY = [
   { entry: "platform-kit", mode: "light" },
   { entry: "signalr", mode: "light" },
   { entry: "theme", mode: "light" },
+  { entry: "utils", mode: "light" },
   { entry: "mdms", mode: "light" },
   { entry: "editor", mode: "heavy" },
   { entry: "file-viewer", mode: "heavy" },

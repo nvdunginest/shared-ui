@@ -11,6 +11,8 @@ export default defineConfig({
     mdms: "src/mdms/index.ts",
     "platform-kit": "src/platform-kit/index.ts",
     signalr: "src/signalr/index.ts",
+    utils: "src/utils/index.ts",
+    ui: "src/ui/index.ts",
   },
   format: ["esm", "cjs"],
   dts: true,
