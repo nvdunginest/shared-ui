@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren } from "react";
-import { useDocumentKit } from "../../config";
+import { useDocumentSections } from "../../config";
 import { getActivityActorName, parseActorSnapshot } from "../../helpers/activities.helper";
 import { ActivityType } from "../../models/ActivityType";
 import IActivity from "../../models/IActivity";
@@ -19,7 +19,7 @@ type Props = PropsWithChildren & {
 
 const BaseActivityItem: FC<Props> = ({ activity }: Props) => {
   const { users } = useSharedUsers();
-  const activityRenderConfigs = useDocumentKit().detail.activities;
+  const activityRenderConfigs = useDocumentSections().activities;
   const actor = parseActorSnapshot(activity.actorJsonData);
   const displayName = getActivityActorName(activity, users);
   const positionName = actor.PositionName;

@@ -1,6 +1,6 @@
 import { Dispatch } from "react";
 import type { DocumentActionApi } from "../../config";
-import type { DocumentBase as IDocument } from "../../models/DocumentBase";
+import type { DocumentCore as IDocument } from "../../models/DocumentBase";
 import { UUID } from "crypto";
 
 import {

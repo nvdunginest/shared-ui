@@ -17,10 +17,14 @@ import {
   DocumentProvider,
   GlobalContext,
   extractApiErrorMessage,
+  getCommentMode,
   isSecretaryOfDocument,
   parseActorSnapshot,
   useDocumentContext,
+  type DocumentSectionsConfig,
 } from "../../src/document-kit";
+import CommentAction from "../../src/document-kit/detail/sections/discussion/CommentAction";
+import { configureUi } from "../../src/ui";
 import { initialState as docInitial, defaultStore as docDefault } from "../../src/document-kit/context/document/type";
 import { initialState as globalInitial, defaultStore as globalDefault } from "../../src/document-kit/context/global/type";
 import { makeConfig, mount } from "./helpers";
@@ -137,5 +141,34 @@ describe("helpers", () => {
   it("parseActorSnapshot tolerates garbage", () => {
     expect(parseActorSnapshot('{"Fullname":"A"}')).toEqual({ Fullname: "A" });
     expect(parseActorSnapshot("not json")).toEqual({});
+  });
+});
+
+describe("comment rule: open, private after the end, locked when cancelled", () => {
+  const sections = (over: Partial<DocumentSectionsConfig> = {}): DocumentSectionsConfig => ({
+    api: { getById: vi.fn(), dismissRemind: vi.fn() } as never,
+    // 1 = processing, 2 = approved/archived (finished), 9 = cancelled
+    statuses: { notEnded: [1], canComment: [1, 2], finished: [2] },
+    activities: [],
+    ...over,
+  });
+  const doc = (status?: number) => ({ id: "d1", status, activities: [], attachments: [] }) as never;
+
+  it("getCommentMode: processing is open, finished is private only, anything else is locked", () => {
+    expect(getCommentMode(sections(), doc(1))).toBe("open");
+    expect(getCommentMode(sections(), doc(2))).toBe("private");
+    expect(getCommentMode(sections(), doc(9))).toBe("locked");
+    expect(getCommentMode(sections(), doc(undefined))).toBe("locked");
+  });
+
+  it("getCommentMode: a commentMode function replaces the status lists (documents without a status)", () => {
+    expect(getCommentMode(sections({ commentMode: () => "open" }), doc(undefined))).toBe("open");
+  });
+
+  it("CommentAction shows the notice with the app's document name and no editor when locked", async () => {
+    configureUi({ documentName: "văn bản" });
+    const wrap = world(9);
+    const { host } = await mount(wrap(<CommentAction />), makeConfig());
+    expect(host.textContent).toContain("Văn bản đã bị hủy hoặc đã đóng, không thể bình luận.");
   });
 });

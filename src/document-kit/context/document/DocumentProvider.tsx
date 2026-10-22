@@ -7,8 +7,8 @@ import {
   useMemo,
   useReducer,
 } from "react";
-import { useDocumentKit } from "../../config";
-import type { DocumentBase as IDocument } from "../../models/DocumentBase";
+import { useDocumentSections } from "../../config";
+import type { DocumentBase, DocumentCore as IDocument } from "../../models/DocumentBase";
 import { useModuleFeedback } from "@ptht365/shared-ui/module-contract";
 import { UUID } from "crypto";
 
@@ -23,7 +23,7 @@ export const DocumentContext = createContext(defaultStore);
 export const DocumentProvider: FC<Props> = ({ children }: Props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { message } = useModuleFeedback();
-  const { detail } = useDocumentKit();
+  const detail = useDocumentSections();
 
   const clear = useCallback(() => action.clear(dispatch), [dispatch]);
   const fetchDocument = useCallback(
@@ -78,5 +78,5 @@ export type DocumentStoreOf<T extends IDocument> = Omit<DocumentStore, "state" |
   updateDocument: (document: T) => void;
 };
 
-export const useDocumentContext = <T extends IDocument = IDocument>() =>
+export const useDocumentContext = <T extends IDocument = DocumentBase>() =>
   useContext(DocumentContext) as unknown as DocumentStoreOf<T>;

@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useDocumentKit } from "../../config";
+import { useDocumentSections } from "../../config";
 import {
   DocumentChangeNotification,
   useSignalRContext,
 } from "../../../signalr";
 import { useModuleFeedback } from "@ptht365/shared-ui/module-contract";
 import { UUID } from "crypto";
+
+import type { DocumentCore } from "../../models/DocumentBase";
+import { getUiConfig } from "../../../ui";
 
 import { useDocumentContext } from "./index";
 
@@ -28,9 +31,9 @@ import { useDocumentContext } from "./index";
  */
 export default function DocumentListenChanged(): JSX.Element {
   const { message } = useModuleFeedback();
-  const { state, updateDocument } = useDocumentContext();
+  const { state, updateDocument } = useDocumentContext<DocumentCore>();
   const { onDocumentChanged, onReconnection } = useSignalRContext();
-  const { detail } = useDocumentKit();
+  const detail = useDocumentSections();
   const apiRef = useRef(detail.api);
 
   // Fetch and update document with latest data. The refresh is silent on success (the screen simply shows the new
@@ -51,7 +54,7 @@ export default function DocumentListenChanged(): JSX.Element {
         message.open({
           key: "DOCUMENT_REFRESH_FAILED",
           type: "warning",
-          content: "Chưa cập nhật được nội dung mới của tờ trình",
+          content: `Chưa cập nhật được nội dung mới của ${getUiConfig().documentName}`,
           duration: 3,
         });
         throw error;

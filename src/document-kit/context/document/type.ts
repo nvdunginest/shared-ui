@@ -1,4 +1,4 @@
-import type { DocumentBase as IDocument } from "../../models/DocumentBase";
+import type { DocumentCore as IDocument } from "../../models/DocumentBase";
 import { UUID } from "crypto";
 
 export type AttachmentView = {

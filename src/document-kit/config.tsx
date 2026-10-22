@@ -4,7 +4,7 @@ import { ComponentType, createContext, FC, PropsWithChildren, useContext } from 
 import type { IFeature } from "../platform-kit";
 
 import type { ActivityRenderConfig } from "./helpers/activities.helper";
-import type { DocumentBase } from "./models/DocumentBase";
+import type { DocumentCore } from "./models/DocumentBase";
 
 import type { TabKey } from "./context/list/type";
 import type PaginationQueryResult from "./models/PaginationQueryResult";
@@ -44,7 +44,7 @@ export type TabConfig = {
 
 /** The backend calls the detail screen makes on a document (the app's documents controller satisfies it). */
 export type DocumentActionApi = {
-  getById(id: UUID): Promise<DocumentBase>;
+  getById(id: UUID): Promise<DocumentCore>;
   dismissRemind(id: UUID): Promise<unknown>;
   transfer(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
   approve(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -68,6 +68,37 @@ export type DocumentStatusRules = {
   /** Ended but still commentable: only private comments are accepted. Empty where ended documents are closed. */
   finished: number[];
 };
+
+/** How the discussion treats comments on a document. */
+export type CommentMode = "open" | "private" | "locked";
+
+/** The two calls the detail sections make (an app without document actions only needs these). */
+export type DocumentReadApi = Pick<DocumentActionApi, "getById" | "dismissRemind">;
+
+/**
+ * What the sections of the detail screen need (discussion, history, attachments). `DocumentDetailConfig` satisfies it,
+ * so an app that uses the whole kit passes only its kit config; an app that takes just the sections provides this
+ * through <DocumentSectionsProvider>.
+ */
+export type DocumentSectionsConfig = {
+  api: DocumentReadApi;
+  statuses: Pick<DocumentStatusRules, "notEnded" | "canComment" | "finished">;
+  /** Replaces the status lists for the comment rule, e.g. for documents that have no status. */
+  commentMode?: (document: DocumentCore) => CommentMode;
+  /** History wording per activity type. */
+  activities: ActivityRenderConfig[];
+};
+
+/**
+ * Comment rule of the discussion: open (everything), private (finished document: private comments only) or locked
+ * (cancelled or otherwise closed). Statuses missing from `canComment` are locked.
+ */
+export function getCommentMode(config: DocumentSectionsConfig, document: DocumentCore): CommentMode {
+  if (config.commentMode) return config.commentMode(document);
+  const status = document.status;
+  if (status === undefined || !config.statuses.canComment.includes(status)) return "locked";
+  return config.statuses.finished.includes(status) ? "private" : "open";
+}
 
 export type DocumentDetailConfig = {
   api: DocumentActionApi;
@@ -114,10 +145,24 @@ export type DocumentKitConfig = {
 };
 
 const DocumentKitContext = createContext<DocumentKitConfig | null>(null);
+const DocumentSectionsContext = createContext<DocumentSectionsConfig | null>(null);
+
+/** For an app that uses only the detail sections (no list kit): provide their wiring here, above <DocumentProvider>. */
+export const DocumentSectionsProvider: FC<PropsWithChildren<{ config: DocumentSectionsConfig }>> = ({ config, children }) => (
+  <DocumentSectionsContext.Provider value={config}>{children}</DocumentSectionsContext.Provider>
+);
+
+export function useDocumentSections(): DocumentSectionsConfig {
+  const config = useContext(DocumentSectionsContext);
+  if (!config) throw new Error("document-kit: wrap the app in <DocumentKitProvider> or <DocumentSectionsProvider>");
+  return config;
+}
 
 /** Wrap the app (above GlobalProvider) once: every component of the kit reads its wording and wiring from here. */
 export const DocumentKitProvider: FC<PropsWithChildren<{ config: DocumentKitConfig }>> = ({ config, children }) => (
-  <DocumentKitContext.Provider value={config}>{children}</DocumentKitContext.Provider>
+  <DocumentKitContext.Provider value={config}>
+    <DocumentSectionsContext.Provider value={config.detail}>{children}</DocumentSectionsContext.Provider>
+  </DocumentKitContext.Provider>
 );
 
 export function useDocumentKit(): DocumentKitConfig {

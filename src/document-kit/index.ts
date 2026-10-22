@@ -1,7 +1,18 @@
 // Light entry (bundled into each app): the document list side of the document apps (company selector,
 // list panel / screen / mobile list, filters, contexts), driven by <DocumentKitProvider config={...}>.
-export { DocumentKitProvider, findCreateFeature, getFooterFeatures, useDocumentKit } from "./config";
+export {
+  DocumentKitProvider,
+  DocumentSectionsProvider,
+  findCreateFeature,
+  getCommentMode,
+  getFooterFeatures,
+  useDocumentKit,
+  useDocumentSections,
+} from "./config";
 export type {
+  CommentMode,
+  DocumentReadApi,
+  DocumentSectionsConfig,
   DocumentActionApi,
   DocumentDetailConfig,
   DocumentStatusRules,
@@ -27,7 +38,7 @@ export { default as DocumentListScreen } from "./layout/DocumentListScreen";
 export { default as DocumentTable } from "./home/DocumentTable";
 
 // ---- detail side: one document (Phase 5)
-export type { DocumentBase } from "./models/DocumentBase";
+export type { DocumentBase, DocumentCore } from "./models/DocumentBase";
 export type { default as IActivity } from "./models/IActivity";
 export type { default as IAttachment } from "./models/IAttachment";
 export type { default as IFollower } from "./models/IFollower";

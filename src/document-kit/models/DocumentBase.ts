@@ -5,6 +5,17 @@ import type IActivity from "./IActivity";
 import type IAttachment from "./IAttachment";
 import type IFollower from "./IFollower";
 
+/**
+ * What the sections of the detail screen (discussion, history, attachments) read of a document. A document that has
+ * no status at all (outgoing documents) simply omits it.
+ */
+export type DocumentCore = IBaseEntity & {
+  id: UUID;
+  status?: number;
+  activities: IActivity[];
+  attachments: IAttachment[];
+};
+
 /** The fields of a document the kit itself reads; each app's own `IDocument` extends it with its domain fields. */
 export type DocumentBase = IBaseEntity & {
   id: UUID;

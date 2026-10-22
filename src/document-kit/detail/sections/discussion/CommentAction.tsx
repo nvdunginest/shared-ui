@@ -1,4 +1,4 @@
-import { useDocumentKit } from "../../../config";
+import { getCommentMode, useDocumentSections } from "../../../config";
 import { lazy, Suspense, useRef, useState } from "react";
 import {
   GlobalOutlined,
@@ -10,9 +10,13 @@ import { useDocumentContext } from "../../../context/document/index";
 import activitiesController from "../../../api/activities.controller";
 import IActivity from "../../../models/IActivity";
 import type { MinimalEditorRef } from "../../../../editor";
+import { extractApiErrorMessage } from "../../../helpers/apiError.helper";
+import { getUiConfig } from "../../../../ui";
+import { useModuleFeedback } from "@ptht365/shared-ui/module-contract";
+import { isAxiosError } from "axios";
 import { isEmptyOrSpaces } from "../../../../text-utils";
 import { ISharedUser, useSharedUsers } from "@ptht365/shared-ui/shared-users";
-import { Button, Skeleton, Switch, Typography } from "antd";
+import { Button, Skeleton, Switch } from "antd";
 import { UUID } from "crypto";
 import { styled } from "styled-components";
 
@@ -26,6 +30,8 @@ type Props = {
   /** Called after a comment is posted successfully (used to close the inline reply composer). */
   onPosted?: () => void;
 };
+
+const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
 function extractMentions(html: string, users: ISharedUser[]): UUID[] {
   const parser = new DOMParser();
@@ -47,14 +53,14 @@ function extractMentions(html: string, users: ISharedUser[]): UUID[] {
 export default function CommentAction({ parentComment, onPosted }: Props): JSX.Element {
   const { users } = useSharedUsers();
   const { state } = useDocumentContext();
+  const { message } = useModuleFeedback();
+  const sections = useDocumentSections();
   const id = state.document?.id;
-  const status = state.document?.status;
-  const { detail } = useDocumentKit();
-  const isFinished = status !== undefined && detail.statuses.finished.includes(status);
-  const canComment = status !== undefined && detail.statuses.canComment.includes(status);
+  const mode = state.document ? getCommentMode(sections, state.document) : "locked";
   const [loading, setLoading] = useState(false);
   const [isPrivateInput, setIsPrivate] = useState(false);
-  // Finished documents only accept private comments.
+  // A finished document only accepts private comments.
+  const isFinished = mode === "private";
   const isPrivate = isFinished || isPrivateInput;
 
   const ref = useRef<MinimalEditorRef>(null);
@@ -64,34 +70,44 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
   };
 
   const handlePostComment = async () => {
-    if (id) {
-      setLoading(true);
-      try {
-        const msg = ref.current?.getData();
-        ref.current?.setData("");
-        if (msg === undefined || isEmptyOrSpaces(msg)) return;
-        await activitiesController.addComment(id, {
-          content: msg,
-          refId: parentComment?.id ?? undefined,
-          objectData: {
-            isPrivate,
-            mentionedUserIds: extractMentions(msg, users),
-          },
-        });
-        onPosted?.();
-      } catch (error) {
-        // console.print("Submit comment", error);
-      } finally {
-        setLoading(false);
+    if (!id) return;
+    const msg = ref.current?.getData();
+    if (msg === undefined || isEmptyOrSpaces(msg)) return;
+    setLoading(true);
+    try {
+      await activitiesController.addComment(id, {
+        content: msg,
+        refId: parentComment?.id ?? undefined,
+        objectData: {
+          isPrivate,
+          mentionedUserIds: extractMentions(msg, users),
+        },
+      });
+      // Clear the box only when the comment went through: on an error the user keeps what they typed.
+      ref.current?.setData("");
+      onPosted?.();
+    } catch (error) {
+      const status = isAxiosError(error) ? error.response?.status : undefined;
+      const documentName = getUiConfig().documentName;
+      if (status === 400) {
+        message.error(
+          `${capitalize(documentName)} đã kết thúc, chỉ có thể bình luận riêng tư. Nội dung bạn vừa soạn vẫn được giữ nguyên trong khung.`,
+        );
+      } else if (status === 404) {
+        message.error(`Bạn không (còn) có quyền bình luận vào ${documentName} này.`);
+      } else {
+        message.error(extractApiErrorMessage(error, "Có lỗi xảy ra, vui lòng thử lại."));
       }
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!canComment) {
+  if (mode === "locked") {
     return (
-      <Typography.Text type="secondary">
-        Tờ trình đã kết thúc — không thể bình luận.
-      </Typography.Text>
+      <DisabledNoticeStl>
+        <LockOutlined /> {capitalize(getUiConfig().documentName)} đã bị hủy hoặc đã đóng, không thể bình luận.
+      </DisabledNoticeStl>
     );
   }
 
@@ -170,4 +186,16 @@ const ContainerStl = styled.div`
   flex-direction: column;
   gap: 4px;
   align-items: flex-end;
+`;
+
+const DisabledNoticeStl = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  color: ${colors.textTertiary};
+  font-size: 13px;
+  background: ${colors.bgPage};
+  border-radius: 16px;
 `;

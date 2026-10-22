@@ -2,7 +2,7 @@ import { FC, PropsWithChildren } from "react";
 import { RollbackOutlined, UndoOutlined } from "@ant-design/icons";
 import { useDocumentContext } from "../../../context/document/index";
 import { CommentObjectData } from "../../../api/activities.controller";
-import { useDocumentKit } from "../../../config";
+import { useDocumentSections } from "../../../config";
 import { getActivityActorName, parseActorSnapshot } from "../../../helpers/activities.helper";
 import IActivity from "../../../models/IActivity";
 import { useAppContext } from "../../../../platform-kit";
@@ -34,7 +34,7 @@ const BaseActivityItem: FC<Props> = ({
   const { userId } = useAppContext().state;
   const { state } = useDocumentContext();
   const { users } = useSharedUsers();
-  const { detail } = useDocumentKit();
+  const detail = useDocumentSections();
   const activityRenderConfigs = detail.activities;
   const actor = parseActorSnapshot(activity.actorJsonData);
   const displayName = getActivityActorName(activity, users);
@@ -52,7 +52,7 @@ const BaseActivityItem: FC<Props> = ({
   const isPrivate = objectData ? objectData.isPrivate : false;
 
   const documentNotEnded =
-    state.document !== null && detail.statuses.notEnded.includes(state.document.status);
+    state.document !== null && detail.statuses.notEnded.includes(state.document.status as number);
 
   // BE tính sẵn activity.canRecall (đúng tác giả, chưa thu hồi, chưa có reply, còn hạn 24h, tờ trình
   // chưa kết thúc) theo current user tại thời điểm query — FE không tự tính lại điều kiện 24h theo

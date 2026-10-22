@@ -1,5 +1,5 @@
 
-import type { DocumentBase as IDocument } from "../../models/DocumentBase";
+import type { DocumentCore as IDocument } from "../../models/DocumentBase";
 
 import { AttachmentView } from "./type";
 

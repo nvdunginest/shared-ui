@@ -3,7 +3,7 @@ import { useDocumentContext } from "../../../context/document/index";
 import activitiesController, {
   CommentObjectData,
 } from "../../../api/activities.controller";
-import { useDocumentKit } from "../../../config";
+import { getCommentMode, useDocumentSections } from "../../../config";
 import { ActivityType } from "../../../models/ActivityType";
 import IActivity from "../../../models/IActivity";
 import { useAppContext } from "../../../../platform-kit";
@@ -47,7 +47,7 @@ const canView = (activity: IActivity, userId: UUID | undefined): boolean => {
 export default function DiscussionSection() {
   const { message } = useModuleFeedback();
   const { state, fetchDocument } = useDocumentContext();
-  const { detail } = useDocumentKit();
+  const sections = useDocumentSections();
   const { userId } = useAppContext().state;
   const documentId = state.document?.id;
   const [replyingTo, setReplyingTo] = useState<UUID | null>(null);
@@ -74,7 +74,7 @@ export default function DiscussionSection() {
   if (!state.document) return <></>;
 
   const activities = state.document.activities;
-  const canComment = detail.statuses.canComment.includes(state.document.status);
+  const canComment = getCommentMode(sections, state.document) !== "locked";
   const byTime = (a: IActivity, b: IActivity) =>
     new Date(a.createdTime).getTime() - new Date(b.createdTime).getTime();
   const comments = activities.filter((x) => x.activityType === ActivityType.COMMENT);
