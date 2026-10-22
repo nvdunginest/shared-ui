@@ -144,31 +144,32 @@ describe("helpers", () => {
   });
 });
 
-describe("comment rule: open, private after the end, locked when cancelled", () => {
+describe("comment rule: locked when cancelled, private after the end, open otherwise", () => {
   const sections = (over: Partial<DocumentSectionsConfig> = {}): DocumentSectionsConfig => ({
     api: { getById: vi.fn(), dismissRemind: vi.fn() } as never,
-    // 1 = processing, 2 = approved/archived (finished), 9 = cancelled
-    statuses: { notEnded: [1], canComment: [1, 2], finished: [2] },
+    // 1 = processing, 2 = ended, 9 = cancelled, 3 = any other status
+    statuses: { notEnded: [1], cancelled: [9], finished: [2] },
     activities: [],
     ...over,
   });
   const doc = (status?: number) => ({ id: "d1", status, activities: [], attachments: [] }) as never;
 
-  it("getCommentMode: processing is open, finished is private only, anything else is locked", () => {
-    expect(getCommentMode(sections(), doc(1))).toBe("open");
-    expect(getCommentMode(sections(), doc(2))).toBe("private");
+  it("getCommentMode: cancelled is locked, ended is private only, every other status (and none) is open", () => {
     expect(getCommentMode(sections(), doc(9))).toBe("locked");
-    expect(getCommentMode(sections(), doc(undefined))).toBe("locked");
+    expect(getCommentMode(sections(), doc(2))).toBe("private");
+    expect(getCommentMode(sections(), doc(1))).toBe("open");
+    expect(getCommentMode(sections(), doc(3))).toBe("open");
+    expect(getCommentMode(sections(), doc(undefined))).toBe("open");
   });
 
   it("getCommentMode: a commentMode function replaces the status lists (documents without a status)", () => {
-    expect(getCommentMode(sections({ commentMode: () => "open" }), doc(undefined))).toBe("open");
+    expect(getCommentMode(sections({ commentMode: () => "private" }), doc(undefined))).toBe("private");
   });
 
   it("CommentAction shows the notice with the app's document name and no editor when locked", async () => {
     configureUi({ documentName: "văn bản" });
-    const wrap = world(9);
+    const wrap = world(4);
     const { host } = await mount(wrap(<CommentAction />), makeConfig());
-    expect(host.textContent).toContain("Văn bản đã bị hủy hoặc đã đóng, không thể bình luận.");
+    expect(host.textContent).toContain("Văn bản đã bị hủy, không thể bình luận.");
   });
 });

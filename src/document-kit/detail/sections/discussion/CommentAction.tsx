@@ -106,7 +106,7 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
   if (mode === "locked") {
     return (
       <DisabledNoticeStl>
-        <LockOutlined /> {capitalize(getUiConfig().documentName)} đã bị hủy hoặc đã đóng, không thể bình luận.
+        <LockOutlined /> {capitalize(getUiConfig().documentName)} đã bị hủy, không thể bình luận.
       </DisabledNoticeStl>
     );
   }

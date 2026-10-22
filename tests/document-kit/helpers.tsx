@@ -52,7 +52,7 @@ export function makeConfig(over: Partial<DocumentKitConfig> = {}): DocumentKitCo
         giveback: vi.fn(),
         returnToSubmitter: vi.fn(),
       },
-      statuses: { draft: 5, processing: [1], notEnded: [5, 1], cancelable: [5, 1], canComment: [5, 1], finished: [] },
+      statuses: { draft: 5, processing: [1], notEnded: [5, 1], cancelable: [5, 1], cancelled: [4], finished: [2] },
       wording: { approveVerb: "phê duyệt", tierName: "cấp duyệt" },
       activities: [{ activityType: 802, text: "Đã phê duyệt tờ trình", showContent: true }],
     },

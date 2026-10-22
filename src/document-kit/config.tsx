@@ -63,9 +63,9 @@ export type DocumentStatusRules = {
   notEnded: number[];
   /** The creator or processor may still cancel it. */
   cancelable: number[];
-  /** Comments are accepted. */
-  canComment: number[];
-  /** Ended but still commentable: only private comments are accepted. Empty where ended documents are closed. */
+  /** Cancelled: comments are locked. Every status in neither `cancelled` nor `finished` takes comments as usual. */
+  cancelled: number[];
+  /** Ended: only private comments are accepted. */
   finished: number[];
 };
 
@@ -82,7 +82,7 @@ export type DocumentReadApi = Pick<DocumentActionApi, "getById"> & Partial<Pick<
  */
 export type DocumentSectionsConfig = {
   api: DocumentReadApi;
-  statuses: Pick<DocumentStatusRules, "notEnded" | "canComment" | "finished">;
+  statuses: Pick<DocumentStatusRules, "notEnded" | "cancelled" | "finished">;
   /** Replaces the status lists for the comment rule, e.g. for documents that have no status. */
   commentMode?: (document: DocumentCore) => CommentMode;
   /** History wording per activity type. */
@@ -90,13 +90,14 @@ export type DocumentSectionsConfig = {
 };
 
 /**
- * Comment rule of the discussion: open (everything), private (finished document: private comments only) or locked
- * (cancelled or otherwise closed). Statuses missing from `canComment` are locked.
+ * Comment rule of the discussion: a cancelled document is locked, an ended one takes private comments only, every other
+ * status is open. A document without a status is open unless the app gives `commentMode`.
  */
 export function getCommentMode(config: DocumentSectionsConfig, document: DocumentCore): CommentMode {
   if (config.commentMode) return config.commentMode(document);
   const status = document.status;
-  if (status === undefined || !config.statuses.canComment.includes(status)) return "locked";
+  if (status === undefined) return "open";
+  if (config.statuses.cancelled.includes(status)) return "locked";
   return config.statuses.finished.includes(status) ? "private" : "open";
 }
 
