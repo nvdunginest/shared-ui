@@ -99,6 +99,14 @@ Order by risk: identical code first, near-identical next, behaviour-bearing code
 
 Rough effort: 5-7 weeks for one developer, phases 1-3 deliver most of the visual consistency in ~2 weeks.
 
+### Phase 2 status (2026-10-22)
+
+Entries added: `./utils` (the helpers every app carried, identical in all five) and `./ui` (components, layout pieces, branded loading, navigation helpers; `configureUi({ documentName, panelStoragePrefix })` keeps each app's wording and its existing `<app>.panel.` localStorage keys). Migrated on branch `refactor/shared-ui-phase2` of each repo: rept (`fdd5d43`), trip (`b90176d`), appr-final (`ef5956c`); 56 to 63 files each, about 1.6k lines removed per app. The apps' local copies differed only in import order, the wording and the storage prefix, so nothing had to be folded into the entries. Bundles: rept 926.1 kB (906.5), trip 957.2 kB (943.8), appr 934.5 kB (929.4); the growth is the loading logo, which tsup inlines as a data URL (about 15 kB), now also in rept and trip.
+
+Behaviour changes to know about: rept and trip now show the branded loading (logo and progress bar) at startup and for list loads, like appr; `Loading` shows the first load at once and delays later ones (the version first written for appr never took the "first load" branch because its flag flipped on the first render; fixed in the entry). Apps need `react-router-dom` and `@ant-design/icons` in `resolve.dedupe`.
+
+Not moved (kept for the phases that need them): `GlobalCompanySelector` (depends on `GlobalContext`, Phase 4), `FileViewer`, `PdfViewer`, `OfficeViewer` (heavy, Phase 3), trip/idoc/odoc-only `AclCheck`, `Forbidden`, `Section`, `CollapsedSection`, `PropertyRender*`, `FormTable`. Theme needed no further unification inside family A (the tokens were already one set after Phase 1); idoc and odoc keep their own copy until D5 is revisited.
+
 ### Phase 1 status (2026-10-22, pilot on `vpi-adm-rept`)
 
 Entries added (light, bundled into the apps): `./theme` (tokens, mixins, popover width, `StyleProvider`), `./mdms` (models, controllers, actor helper, `configureMdms({ baseUrl })`), `./platform-kit`, `./signalr`. Source of truth was rept's copy (identical to appr except a comment, the hub URL and a newer, null-safe `secretaries.controller`). In rept the local copies were deleted and 82 files now import the entries; rept's bundle is unchanged (906.5 kB against 906.4 kB before) and the module was checked inside the shell (list, companies, hub negotiation, mdms calls).
