@@ -17,7 +17,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "baseUrl": ".",
+    "paths": {
+      "@ptht365/shared-ui/platform": ["src/platform/index.ts"],
+      "@ptht365/shared-ui/module-contract": ["src/module-contract/index.ts"],
+      "@ptht365/shared-ui/shared-users": ["src/shared-users/index.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

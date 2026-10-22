@@ -7,6 +7,10 @@ export default defineConfig({
     platform: "src/platform/index.ts",
     "module-contract": "src/module-contract/index.ts",
     "dev-shell": "src/dev-shell/index.ts",
+    theme: "src/theme/index.ts",
+    mdms: "src/mdms/index.ts",
+    "platform-kit": "src/platform-kit/index.ts",
+    signalr: "src/signalr/index.ts",
   },
   format: ["esm", "cjs"],
   dts: true,
@@ -32,6 +36,12 @@ export default defineConfig({
     "axios",
     "dayjs",
     "jwt-decode",
+    "@microsoft/signalr",
+    // Light entries import these by package name, so the app's bundler resolves them to the same instance
+    // the app (and, for ./platform, the host) uses; they must never be inlined into a shared chunk.
+    "@ptht365/shared-ui/platform",
+    "@ptht365/shared-ui/module-contract",
+    "@ptht365/shared-ui/shared-users",
   ],
   esbuildOptions(options) {
     options.loader = {

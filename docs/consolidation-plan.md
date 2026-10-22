@@ -43,7 +43,9 @@ Rule: **new code goes in separate subpath entries**, not in the main barrel. The
 
 | Entry | Contents | Weight |
 |---|---|---|
-| `./platform` (extend) | AppContext, controllers (`app`, `files`, `users`, `userRoles`), models, helpers, `axiosBuilder` | light |
+| `./platform` (unchanged) | `axiosBuilder` only. It stays minimal because the shell loads it eagerly as a host singleton; every byte added here is paid by the shell's first load | light |
+| `./platform-kit` (new) | app-level platform code: AppContext + AppLoader, controllers (`app`, `files`, `users`, `userRoles`), helpers, models, status messages | light |
+| `./signalr` (new) | document hub connector, provider, toast connector; `configureDocumentHub({ hubUrl })` | light |
 | `./mdms` (new) | dtaMdms models + controllers, `GlobalLoader` logic as a hook/provider factory | light |
 | `./theme` (new) | `colors/radii/shadows/spacing` tokens, `StyleProvider`, `mixins`, `popoverWidth`, text utils (`removeVietnameseTones`, `getShortName`...) | light |
 | `./ui` (new) | `TitleBar`, `ExpandingTabBar`, `CollapsedPanelStrip`, `FooterIconNav`, `UserInfo`, `SelectUser(Chip)`, `avatarColor`, `Forbidden`, `AclCheck`, `Section`, `CollapsedSection`, `PropertyRender*`, `GlobalCompanySelector`, branded loading (`BrandedLoading`, replaces the dark `ModuleLoadingOverlay` as default), `DebugFrameLabel` | medium, no CKEditor |
@@ -75,7 +77,7 @@ Order by risk: identical code first, near-identical next, behaviour-bearing code
 **Phase 0 - Foundations (no app change)**
 - **Existing entries are frozen.** `scripts/check-exports.mjs` pins the public surface of `.`, `./platform`, `./shared-users` and the bytes of `src/index.ts` and `src/layout/*` (the shell and legacy modules depend on them). So the old, drifted shared-ui copies (`MasterPage`, `UserInfo`, `utils.ts`, old editors) are **not** "synced"; the app-derived code goes into the new entries and the old files stay as legacy until nothing imports them.
 - Source of truth per file: generated, not guessed. `npm run check:duplication -- --sot` lists, for every file that exists in several apps, which app changed it last (git date) and how far each copy is from it; the result is committed as `docs/source-of-truth.md`.
-- Entry policy: `scripts/check-entry-isolation.mjs` is driven by an explicit table (light entries `./ui`, `./theme`, `./mdms` must not import CKEditor, PDF viewer or axios; heavy entries may). Planned entries are listed there now and are checked as soon as they are built.
+- Entry policy: `scripts/check-entry-isolation.mjs` is driven by an explicit table (light entries `./ui`, `./theme`, `./mdms`, `./platform-kit`, `./signalr` must not import CKEditor or the PDF viewer and may reach only the `@ptht365/shared-ui/{platform,module-contract,shared-users}` singletons; heavy entries may). Planned entries are listed there now and are checked as soon as they are built.
 - `scripts/check-duplication.mjs` (report mode) measures duplication between the apps and against shared-ui, so progress and regressions are visible.
 - Tests for code that exists and is untested (`createSharedResource`, `utils`) so the vitest harness is proven for pure code; component smoke tests arrive with each component in its phase.
 - Registering a new entry is a 4-file change (`tsup.config.ts`, `package.json#exports`, isolation table, shell `shared` list for heavy entries); this is written down in `CLAUDE.md` of this repo.
@@ -95,6 +97,19 @@ Order by risk: identical code first, near-identical next, behaviour-bearing code
 **Phase 7 - Guard rails (1 day)**: lint rule or CI check that forbids re-creating a file whose name exists in shared-ui; update each app's `CLAUDE.md` / `docs/07-development-guide.md` (new components go to shared-ui first); changelog entry per app.
 
 Rough effort: 5-7 weeks for one developer, phases 1-3 deliver most of the visual consistency in ~2 weeks.
+
+### Phase 1 status (2026-10-22, pilot on `vpi-adm-rept`)
+
+Entries added (light, bundled into the apps): `./theme` (tokens, mixins, popover width, `StyleProvider`), `./mdms` (models, controllers, actor helper, `configureMdms({ baseUrl })`), `./platform-kit`, `./signalr`. Source of truth was rept's copy (identical to appr except a comment, the hub URL and a newer, null-safe `secretaries.controller`). In rept the local copies were deleted and 82 files now import the entries; rept's bundle is unchanged (906.5 kB against 906.4 kB before) and the module was checked inside the shell (list, companies, hub negotiation, mdms calls).
+
+Rules the pilot established for every consuming app:
+- Configure once at app start (in the same effect as `axiosBuilder.configure`): `configureMdms({ baseUrl })` and `configureDocumentHub({ hubUrl })`. Modules that import `@ptht365/shared-ui/signalr` must not create the connector at import time (the URL is not known yet; the entry creates it lazily).
+- `rsbuild.config.ts`: `resolve.dedupe: ["axios", "@microsoft/signalr", "jwt-decode"]`, otherwise shared-ui's own `node_modules` copy is bundled next to the app's (rept's `lib-axios` doubled from 35 kB to 70 kB until this was added), and share `@ptht365/shared-ui/platform` (`import: false` in production, like the other host-provided packages).
+- `tsconfig.json`: map `styled-components` to the app's `node_modules` in `paths`; shared-ui has a different patch version and TypeScript otherwise reports the mixins' `RuleSet` as incompatible.
+- `@microsoft/signalr` is now a peer dependency of shared-ui.
+- After rebuilding shared-ui (`clean: true` wipes `dist/`), restart the running app dev servers: they keep a stale "Module not found" state.
+
+Known issue carried over unchanged: `filesController.uploadChunk` sends `Authorization: Bearer ` with an empty token in every app (since 2026-08); shared-ui's legacy copy sends the real token. Behaviour was preserved on purpose; decide with the backend owner whether the endpoint should receive the real token.
 
 ### Phase 0 status (2026-10-22, branch `chore/shared-ui-foundations`)
 

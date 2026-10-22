@@ -4,7 +4,7 @@
 //  strict  entries (module-contract, dev-shell): import only a short list of external packages and nothing relative
 //          (contract 1, 9.4): no relative import, no shared chunk (tsup `splitting` would tie the entry to the barrel).
 //  light   entries (ui, theme, mdms): may share chunks with each other, but everything reachable from the entry
-//          (following relative imports) must stay free of the heavy packages (CKEditor, PDF viewer, axios...).
+//          (following relative imports) must stay free of the heavy packages (CKEditor, PDF viewer...).
 //  heavy   entries (editor, file-viewer, document-kit): no restriction here; they are shared through the shell.
 //
 // An entry listed below that is not built yet is only reported (planned entries are checked as soon as they exist).
@@ -17,12 +17,17 @@ const dist = join(root, "dist");
 
 const STRICT_ALLOWED = new Set(["react", "react/jsx-runtime", "react-dom", "antd", "styled-components"]);
 const STRICT_FORBIDDEN = ["@ptht365/", "ckeditor5", "@ckeditor", "@react-pdf-viewer", "axios", "jwt-decode", "react-router-dom"];
-const LIGHT_FORBIDDEN = ["@ptht365/", "ckeditor5", "@ckeditor", "@react-pdf-viewer", "pdfjs-dist", "axios", "jwt-decode"];
+// axios is allowed: every app already bundles it (it is not what makes an entry heavy).
+const LIGHT_FORBIDDEN = ["ckeditor5", "@ckeditor", "@react-pdf-viewer", "pdfjs-dist"];
+// A light entry reaches the shared singletons by package name (the app's bundler resolves them); nothing else of this package.
+const LIGHT_ALLOWED_SELF = new Set(["@ptht365/shared-ui/platform", "@ptht365/shared-ui/module-contract", "@ptht365/shared-ui/shared-users"]);
 
 const POLICY = [
   { entry: "module-contract", mode: "strict" },
   { entry: "dev-shell", mode: "strict" },
   { entry: "ui", mode: "light" },
+  { entry: "platform-kit", mode: "light" },
+  { entry: "signalr", mode: "light" },
   { entry: "theme", mode: "light" },
   { entry: "mdms", mode: "light" },
   { entry: "editor", mode: "heavy" },
@@ -85,6 +90,7 @@ for (const { entry, mode } of POLICY) {
       const externals = [...reachableExternals(file)];
       for (const spec of externals) {
         if (LIGHT_FORBIDDEN.some((p) => spec.startsWith(p))) problems.push(`${entry}.${ext}: reaches heavy package "${spec}"`);
+        else if (spec.startsWith("@ptht365/") && !LIGHT_ALLOWED_SELF.has(spec)) problems.push(`${entry}.${ext}: imports "${spec}" (allowed: ${[...LIGHT_ALLOWED_SELF].join(", ")})`);
       }
       console.log(`info  ${entry}.${ext}: reaches ${externals.join(", ") || "(none)"}`);
     }

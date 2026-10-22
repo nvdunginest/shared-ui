@@ -29,7 +29,8 @@ those files to "fix" them; new code goes into new entries.
    viewer or axios, even through shared chunks) or `heavy` (editor, file-viewer, document-kit).
 3. Heavy entries are shared through the shell (`vpi-sys-soff/rsbuild.config.ts` `shared`, decision D1) and each app adds the entry to its own
    `shared` config; the shell must be released before an app that imports the entry goes to production. Light entries are bundled into the apps.
-4. Never import app aliases (`@presentation/...`) from this repo; take what the code needs through props, context or config.
+4. Light entries reach the singletons by package name (`@ptht365/shared-ui/platform`, `/module-contract`, `/shared-users`), never by relative path: those names are listed in `external` in `tsup.config.ts` and aliased to the sources in `vitest.config.ts` and `tsconfig.json#paths`.
+5. Never import app aliases (`@presentation/...`) from this repo; take what the code needs through props, context or config.
 
 ## Architecture
 

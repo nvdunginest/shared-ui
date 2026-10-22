@@ -31,6 +31,26 @@
       "types": "./dist/dev-shell.d.ts",
       "import": "./dist/dev-shell.js",
       "require": "./dist/dev-shell.cjs"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "import": "./dist/theme.js",
+      "require": "./dist/theme.cjs"
+    },
+    "./mdms": {
+      "types": "./dist/mdms.d.ts",
+      "import": "./dist/mdms.js",
+      "require": "./dist/mdms.cjs"
+    },
+    "./platform-kit": {
+      "types": "./dist/platform-kit.d.ts",
+      "import": "./dist/platform-kit.js",
+      "require": "./dist/platform-kit.cjs"
+    },
+    "./signalr": {
+      "types": "./dist/signalr.d.ts",
+      "import": "./dist/signalr.js",
+      "require": "./dist/signalr.cjs"
     }
   },
   "files": [
@@ -63,12 +83,14 @@
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "react-router-dom": ">=6.0.0",
-    "styled-components": ">=6.0.0"
+    "styled-components": ">=6.0.0",
+    "@microsoft/signalr": ">=8.0.0"
   },
   "devDependencies": {
     "@ant-design/colors": "^7.1.0",
     "@ant-design/icons": "^5.3.7",
     "@ckeditor/ckeditor5-react": "8.0.0",
+    "@microsoft/signalr": "^8.0.29",
     "@react-pdf-viewer/core": "3.12.0",
     "@react-pdf-viewer/toolbar": "3.12.0",
     "@react-pdf-viewer/zoom": "3.12.0",
@@ -93,5 +115,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "peerDependenciesMeta": {}
 }
