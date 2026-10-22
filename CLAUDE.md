@@ -12,10 +12,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run build          # Build dist/ (tsup, ESM + CJS + .d.ts)
 npm run build:watch    # Watch mode for local development
 npm run type-check     # TypeScript check without emit
+npm test               # vitest (jsdom): tests/**
+npm run check          # type-check + tests + build + check:exports + check:isolation
+npm run check:duplication [-- --files | --sot | --json]   # duplication report across the document apps
 npm publish            # Runs build first via prepublishOnly hook
 ```
 
-There are no tests in this repo.
+Tests live in `tests/` (see `tests/README.md`). The existing entries (`.`, `./platform`, `./shared-users`) are frozen by
+`scripts/check-exports.mjs` (public surface of the entries and the bytes of `src/index.ts` and `src/layout/*`): do not edit
+those files to "fix" them; new code goes into new entries.
+
+### Adding an entry (docs/consolidation-plan.md, section 3)
+
+1. Create `src/<entry>/index.ts`; add it to `tsup.config.ts` (`entry`) and `package.json` (`exports`).
+2. List it in the `POLICY` table of `scripts/check-entry-isolation.mjs`: `light` (ui, theme, mdms: must not reach CKEditor, the PDF
+   viewer or axios, even through shared chunks) or `heavy` (editor, file-viewer, document-kit).
+3. Heavy entries are shared through the shell (`vpi-sys-soff/rsbuild.config.ts` `shared`, decision D1) and each app adds the entry to its own
+   `shared` config; the shell must be released before an app that imports the entry goes to production. Light entries are bundled into the apps.
+4. Never import app aliases (`@presentation/...`) from this repo; take what the code needs through props, context or config.
 
 ## Architecture
 
