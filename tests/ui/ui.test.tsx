@@ -123,6 +123,22 @@ describe("ui entry", () => {
     expect(host.querySelector("[role=status]")).toBeNull();
     await act(async () => vi.advanceTimersByTime(250));
     expect(host.querySelector("[role=status]")).not.toBeNull();
+
+    // it stays up for its minimum time after the load ended, then goes
+    appState.loading = false;
+    await render(<Loading />);
+    expect(host.querySelector("[role=status]")).not.toBeNull();
+    await act(async () => vi.advanceTimersByTime(700));
+    expect(host.querySelector("[role=status]")).toBeNull();
+
+    // a load that ends before the delay never shows anything
+    appState.loading = true;
+    await render(<Loading />);
+    await act(async () => vi.advanceTimersByTime(100));
+    appState.loading = false;
+    await render(<Loading />);
+    await act(async () => vi.advanceTimersByTime(1000));
+    expect(host.querySelector("[role=status]")).toBeNull();
     vi.useRealTimers();
   });
 });
