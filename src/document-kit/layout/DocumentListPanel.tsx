@@ -51,8 +51,8 @@ const DocumentListPanel: FC = () => {
           </CompanyHighlightStl>
           {canCollapse && (
             <Button
-              size="small"
               icon={<DoubleLeftOutlined />}
+              style={{ flex: "0 0 32px", width: 32 }}
               onClick={toggle}
               title={hideLabel}
               aria-label={hideLabel}
@@ -73,6 +73,7 @@ const DocumentListPanel: FC = () => {
             )}
             <Button
               icon={<ExpandAltOutlined />}
+              style={{ flex: "0 0 32px", width: 32 }}
               onClick={() => navigate("/list")}
               title="Mở danh sách mở rộng"
               aria-label="Mở danh sách mở rộng"
