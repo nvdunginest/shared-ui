@@ -1,5 +1,5 @@
 import { Dispatch } from "react";
-import type { DocumentActionApi } from "../../config";
+import type { DocumentReadApi } from "../../config";
 import type { DocumentCore as IDocument } from "../../models/DocumentBase";
 import { UUID } from "crypto";
 
@@ -23,13 +23,13 @@ async function fetchDocument(
   id: UUID,
   dispatch: Dispatch<Actions>,
   notifyError: (text: string) => void,
-  api: Pick<DocumentActionApi, "getById" | "dismissRemind">,
+  api: DocumentReadApi,
 ) {
   try {
     const document = await api.getById(id);
     dispatch({ type: FETCH_DOCUMENT_SUCCESS, payload: { document } });
     // Auto-dismiss remind khi user mở document — fire-and-forget (lỗi không ảnh hưởng UX)
-    api.dismissRemind(id).catch(() => undefined);
+    api.dismissRemind?.(id).catch(() => undefined);
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
     if (status === 403) {

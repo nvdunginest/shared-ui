@@ -198,3 +198,17 @@ and `departmentsController` in the kit gained `getAllDepartments` and an optiona
 Phases 4-5 (document-kit list and detail) are **not** applied: their list and detail screens carry concepts the kit has no place for yet
 (clerk/staff view mode with `ClerkRoleSync` and `RoleModeGate`, role-gated scope tabs, awaiting counts, category/issuer/recipient filters,
 category and issuer in the global state, different create/edit forms). They need a kit extension design first.
+
+
+### idoc / odoc: the right-hand panel (discussion, history) from the kit
+
+`@ptht365/shared-ui/document-kit` can now be used for the detail sections alone: wrap the app in `<DocumentSectionsProvider config>`
+(api.getById, status lists, history wording) instead of `<DocumentKitProvider>`. The comment rule is one function,
+`getCommentMode(config, document)` -> `open` | `private` | `locked`:
+statuses in `canComment` and not in `finished` are open, statuses in `finished` take private comments only, every other status
+(cancelled/deleted) is locked; an app whose documents have no status passes `commentMode` instead (odoc: always open).
+Wording ("Chua cap nhat duoc noi dung moi cua <documentName>", the locked notice) comes from `configureUi({ documentName })`.
+Comment send errors are reported by status (400 finished, 404 no access, other: the backend message) and the box is cleared only on success.
+idoc (PROCESSING open; APPROVED/ARCHIVED private; DELETED locked) and odoc (no status) now use the kit's DocumentContext,
+DiscussionSection and HistorySection; their own attachments/reference-links sections, actions and InfoSection stay local.
+rept and trip keep their rule (no comments after the end): their backends have no private-after-end concept.

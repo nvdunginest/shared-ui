@@ -78,4 +78,5 @@ export { default as AttachmentsSection } from "./detail/sections/AttachmentsSect
 export { default as SectionView } from "./detail/sections/SectionView";
 export { default as ReferenceLinksSection } from "./detail/sections/ReferenceLinksSection";
 export { default as DiscussionSection } from "./detail/sections/discussion/index";
+export { extractMentions } from "./detail/sections/discussion/CommentAction";
 export { default as HistorySection } from "./detail/sections/HistorySection";

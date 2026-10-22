@@ -33,7 +33,7 @@ type Props = {
 
 const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
-function extractMentions(html: string, users: ISharedUser[]): UUID[] {
+export function extractMentions(html: string, users: ISharedUser[]): UUID[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
   const mentionElements = doc.querySelectorAll("span.mention");

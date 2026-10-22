@@ -72,8 +72,8 @@ export type DocumentStatusRules = {
 /** How the discussion treats comments on a document. */
 export type CommentMode = "open" | "private" | "locked";
 
-/** The two calls the detail sections make (an app without document actions only needs these). */
-export type DocumentReadApi = Pick<DocumentActionApi, "getById" | "dismissRemind">;
+/** The calls the detail sections make (an app without document actions only needs these; reminders are optional). */
+export type DocumentReadApi = Pick<DocumentActionApi, "getById"> & Partial<Pick<DocumentActionApi, "dismissRemind">>;
 
 /**
  * What the sections of the detail screen need (discussion, history, attachments). `DocumentDetailConfig` satisfies it,

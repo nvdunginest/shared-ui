@@ -9,14 +9,15 @@ type IActivity = IBaseEntity & {
   objectJsonData: string;
   actorJsonData: string;
   referenceId: UUID | null;
-  isRecalled: boolean;
-  recalledTime: string | null;
+  /** Recall (thu hồi) fields: absent for apps whose backend has no recall (outgoing documents). */
+  isRecalled?: boolean;
+  recalledTime?: string | null;
   /**
    * BR-48→BR-52: cờ tính sẵn từ BE (đúng tác giả, chưa thu hồi, chưa có reply, còn hạn 24h, tờ trình
    * chưa kết thúc) — FE chỉ đọc trực tiếp field này, KHÔNG tự tính lại điều kiện 24h theo đồng hồ
    * trình duyệt để tránh lệch timezone giữa server/client.
    */
-  canRecall: boolean;
+  canRecall?: boolean;
 };
 
 export default IActivity;
