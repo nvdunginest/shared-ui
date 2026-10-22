@@ -39,8 +39,10 @@ export const initialState: AppState = {
   userId: undefined,
   userRoles: [],
 
-  loading: false,
-  status: "",
+  // The app loader starts right after mount: begin in the loading state so the startup screen is not
+  // interrupted for a frame (the page would show through) before the loader flags it.
+  loading: true,
+  status: "Đang tải dữ liệu",
   logs: [],
 
   appName: "",

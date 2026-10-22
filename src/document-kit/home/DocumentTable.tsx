@@ -127,6 +127,9 @@ export default function DocumentTable({
 
   // Local loading state: a list fetch must not dim the whole module (the global overlay is for user actions).
   const [fetching, setFetching] = useState(false);
+  // False until the first list answer (or a long wait for a company) is in: until then show the skeleton,
+  // never "Không có dữ liệu", which would flash for a moment before the first fetch starts.
+  const [settled, setSettled] = useState(false);
   const [data, setData] =
     useState<PaginationQueryResult<ListDocument> | null>(null);
 
@@ -137,6 +140,13 @@ export default function DocumentTable({
     || sectorIds.length > 0
     || departmentIds.length > 0
     || projectIds.length > 0;
+
+  useEffect(() => {
+    if (selectedCompanyId) return undefined;
+    // No company yet: the company list is still loading. If it never yields one, show the empty state.
+    const timer = setTimeout(() => setSettled(true), NO_COMPANY_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [selectedCompanyId]);
 
   // Đổi công ty → xoá ngay danh sách cũ, tránh hiển thị nhầm dữ liệu công ty trước
   // trong lúc chờ danh sách mới tải xong.
@@ -204,6 +214,7 @@ export default function DocumentTable({
       } catch {
         if (requestId === latestRequestIdRef.current) setData(null);
       } finally {
+        if (requestId === latestRequestIdRef.current) setSettled(true);
         if (!silent && requestId === latestRequestIdRef.current)
           setFetching(false);
       }
@@ -332,7 +343,7 @@ export default function DocumentTable({
         </>
       )}
       <DataStl ref={scrollRef}>
-        {data === null && fetching ? (
+        {data === null && (fetching || !settled) ? (
           <Skeleton active title={false} paragraph={{ rows: 6 }} style={{ padding: 8 }} />
         ) : (
           <Spin spinning={fetching} wrapperClassName="document-list-spin">
@@ -378,6 +389,9 @@ export default function DocumentTable({
     </ContainerStl>
   );
 }
+
+/** How long a list waits for a company before it shows the empty state. */
+const NO_COMPANY_SETTLE_MS = 2500;
 
 const ContainerStl = styled.div`
   width: 100%;

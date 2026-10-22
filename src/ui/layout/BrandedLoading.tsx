@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { keyframes, styled } from "styled-components";
+import { css, keyframes, styled } from "styled-components";
 
 import logo from "../assets/van-phu-logo-full.png";
 import { colors } from "../../theme";
@@ -13,8 +13,8 @@ type Props = {
   delay?: number;
 };
 
-const LOGO_WIDTH = 160;
-const LOGO_HEIGHT = 24;
+const LOGO_WIDTH = 176;
+const LOGO_HEIGHT = 27;
 
 /**
  * Full-frame loading layer of the module: company logo above an indeterminate progress bar.
@@ -33,11 +33,13 @@ const BrandedLoading: FC<Props> = ({ tip, variant = "page", delay = 0 }) => {
 
   return (
     <OverlayStl $variant={variant} role="status" aria-busy="true" aria-live="polite" data-testid="module-loading-overlay">
-      <LogoStl src={logo} alt="Van Phu" width={LOGO_WIDTH} height={LOGO_HEIGHT} />
-      <TrackStl aria-hidden="true">
-        <BarStl />
-      </TrackStl>
-      {tip ? <TipStl>{tip}</TipStl> : null}
+      <StackStl>
+        <LogoStl src={logo} alt="Van Phu" width={LOGO_WIDTH} height={LOGO_HEIGHT} />
+        <TrackStl aria-hidden="true">
+          <BarStl />
+        </TrackStl>
+        {tip ? <TipStl>{tip}</TipStl> : null}
+      </StackStl>
     </OverlayStl>
   );
 };
@@ -59,17 +61,26 @@ const OverlayStl = styled.div<{ $variant: "page" | "veil" }>`
   inset: 0;
   z-index: 1000;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
   padding: 0 24px;
   background: ${({ $variant }) => ($variant === "page" ? "#fff" : "rgba(255, 255, 255, 0.82)")};
-  animation: ${fadeIn} 0.15s ease-out;
+  /* The page variant continues the shell's own loader: no fade, or both logos ghost through each other. */
+  animation: ${({ $variant }) => ($variant === "veil" ? css`${fadeIn} 0.15s ease-out` : "none")};
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
+`;
+
+// Logo and bar keep their place whether or not a tip is shown (the tip hangs below them).
+const StackStl = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
 `;
 
 const LogoStl = styled.img`
@@ -82,7 +93,7 @@ const LogoStl = styled.img`
 
 const TrackStl = styled.div`
   position: relative;
-  width: 160px;
+  width: 176px;
   max-width: 60%;
   height: 3px;
   overflow: hidden;
@@ -106,6 +117,13 @@ const BarStl = styled.div`
 `;
 
 const TipStl = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 320px;
+  max-width: 80vw;
+  margin-top: 16px;
+  transform: translateX(-50%);
   color: ${colors.textTertiary};
   font-size: 13px;
   line-height: 1.5;
