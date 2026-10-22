@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { removeVietnameseTones } from "../../utils";
+import { removeVietnameseTones } from "../../text-utils";
 import { ISharedUser, useSharedUsers } from "@ptht365/shared-ui/shared-users";
 import { Select } from "antd";
 import { UUID } from "crypto";

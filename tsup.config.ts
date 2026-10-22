@@ -11,8 +11,10 @@ export default defineConfig({
     mdms: "src/mdms/index.ts",
     "platform-kit": "src/platform-kit/index.ts",
     signalr: "src/signalr/index.ts",
-    utils: "src/utils/index.ts",
+    utils: "src/text-utils/index.ts",
     ui: "src/ui/index.ts",
+    editor: "src/editor/index.ts",
+    "file-viewer": "src/file-viewer/index.ts",
   },
   format: ["esm", "cjs"],
   dts: true,
@@ -20,6 +22,8 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
+  // The entry-local stylesheet (editor attachment widget) is injected by the JS; third-party css stays an external import.
+  injectStyle: true,
   external: [
     "react",
     "react/jsx-runtime",

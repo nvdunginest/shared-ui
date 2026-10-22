@@ -61,6 +61,16 @@
       "types": "./dist/ui.d.ts",
       "import": "./dist/ui.js",
       "require": "./dist/ui.cjs"
+    },
+    "./editor": {
+      "types": "./dist/editor.d.ts",
+      "import": "./dist/editor.js",
+      "require": "./dist/editor.cjs"
+    },
+    "./file-viewer": {
+      "types": "./dist/file-viewer.d.ts",
+      "import": "./dist/file-viewer.js",
+      "require": "./dist/file-viewer.cjs"
     }
   },
   "files": [

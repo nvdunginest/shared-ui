@@ -337,3 +337,5 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
     document.body.removeChild(area);
   }
 }
+
+export { default as richTextHelper, isSafeHref, normalizeRichText } from "./richText";

@@ -6,7 +6,7 @@ import {
   isEmptyOrSpaces,
   removeVietnameseTones,
   selectSearch,
-} from "../../src/utils";
+} from "../../src/text-utils";
 
 // The `./utils` entry is the copy every document app carried (identical in all five); these cases pin its behaviour.
 describe("utils entry", () => {

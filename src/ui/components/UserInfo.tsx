@@ -1,4 +1,4 @@
-import { getShortName } from "../../utils";
+import { getShortName } from "../../text-utils";
 import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
 import { Tooltip, Typography } from "antd";
 import { UUID } from "crypto";

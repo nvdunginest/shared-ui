@@ -8,7 +8,7 @@
 import type { ISharedUser } from "@ptht365/shared-ui/shared-users";
 import { avatarColors } from "../../theme";
 
-import { removeVietnameseTones } from "../../utils";
+import { removeVietnameseTones } from "../../text-utils";
 
 const CHAIRMAN_TITLE = "chu tich hoi dong quan tri";
 // A vice chairman is not the chairman, even though the title contains the same words.
