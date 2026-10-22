@@ -20,7 +20,15 @@ const STRICT_FORBIDDEN = ["@ptht365/", "ckeditor5", "@ckeditor", "@react-pdf-vie
 // axios is allowed: every app already bundles it (it is not what makes an entry heavy).
 const LIGHT_FORBIDDEN = ["ckeditor5", "@ckeditor", "@react-pdf-viewer", "pdfjs-dist"];
 // A light entry reaches the shared singletons by package name (the app's bundler resolves them); nothing else of this package.
-const LIGHT_ALLOWED_SELF = new Set(["@ptht365/shared-ui/platform", "@ptht365/shared-ui/module-contract", "@ptht365/shared-ui/shared-users"]);
+// ./editor and ./file-viewer may be referenced by name (lazy import, resolved by the app to the shell-provided entry): that never
+// inlines CKEditor or the PDF viewer into the light entry.
+const LIGHT_ALLOWED_SELF = new Set([
+  "@ptht365/shared-ui/platform",
+  "@ptht365/shared-ui/module-contract",
+  "@ptht365/shared-ui/shared-users",
+  "@ptht365/shared-ui/editor",
+  "@ptht365/shared-ui/file-viewer",
+]);
 
 const POLICY = [
   { entry: "module-contract", mode: "strict" },

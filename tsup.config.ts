@@ -49,6 +49,9 @@ export default defineConfig({
     "@ptht365/shared-ui/platform",
     "@ptht365/shared-ui/module-contract",
     "@ptht365/shared-ui/shared-users",
+    // Heavy entries are provided by the shell: the kit loads them lazily by package name and never inlines them.
+    "@ptht365/shared-ui/editor",
+    "@ptht365/shared-ui/file-viewer",
   ],
   esbuildOptions(options) {
     options.loader = {

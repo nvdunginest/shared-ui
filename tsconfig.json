@@ -22,7 +22,9 @@
     "paths": {
       "@ptht365/shared-ui/platform": ["src/platform/index.ts"],
       "@ptht365/shared-ui/module-contract": ["src/module-contract/index.ts"],
-      "@ptht365/shared-ui/shared-users": ["src/shared-users/index.ts"]
+      "@ptht365/shared-ui/shared-users": ["src/shared-users/index.ts"],
+      "@ptht365/shared-ui/editor": ["src/editor/index.ts"],
+      "@ptht365/shared-ui/file-viewer": ["src/file-viewer/index.ts"]
     }
   },
   "include": ["src"],
