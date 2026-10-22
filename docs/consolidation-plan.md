@@ -99,6 +99,16 @@ Order by risk: identical code first, near-identical next, behaviour-bearing code
 
 Rough effort: 5-7 weeks for one developer, phases 1-3 deliver most of the visual consistency in ~2 weeks.
 
+### Phase 3 status (2026-10-22)
+
+Heavy entries added: `./editor` (CustomView, MinimalEditor, ReferenceLinks editor/view, FileAttachmentPlugin, paste auto link, safe link opening) and `./file-viewer` (FileViewer, PdfViewer, OfficeViewer); the rich-text helpers moved to `./utils`. Both heavy entries are provided by the shell: `Content.tsx` lazy-imports them and `rsbuild.config.ts` declares them as singletons (the module federation plugin only emits a shared entry that the host code imports; declaring it in the config alone, or importing it without declaring it, does not work). Shell initial bundle +1.9 kB; the entries are async chunks. Apps (rept `8a3dc97`, trip, appr-final, all on main) import them and build with `import: false`, so their production bundles drop from 926.1, 957.2 and 934.5 kB to 575.8, 601.1 and 575.1 kB.
+
+**Deploy order:** the shell must be released before any app build that imports `./editor` or `./file-viewer`; an app deployed first fails to load (`c is not a function` in its `remoteEntry.js`, shown as a blank module).
+
+Verified end to end: the production build of rept (served statically) in the shell dev server, with the document page and its CKEditor comment box working and no editor chunk requested from the app's origin. Not verified: PDF preview (no document with a PDF in the dev data), trip and appr production builds in the shell (their backends are down).
+
+Behaviour changes: trip gets the accent-insensitive mention search of the other apps; the `MinimalEditor` typing error that every app carried is fixed once in the entry (the apps are now `tsc` clean); `resolve.dedupe` must not list `ckeditor5` or `@react-pdf-viewer/*` (it breaks their sub-path css imports); the `src/utils` folder was renamed `src/text-utils` because relative imports of `utils` resolved to the legacy `src/utils.ts` (the Phase 2 `ui` entry had been importing the legacy helpers; the cases it uses are identical).
+
 ### Phase 2 status (2026-10-22)
 
 Entries added: `./utils` (the helpers every app carried, identical in all five) and `./ui` (components, layout pieces, branded loading, navigation helpers; `configureUi({ documentName, panelStoragePrefix })` keeps each app's wording and its existing `<app>.panel.` localStorage keys). Migrated on branch `refactor/shared-ui-phase2` of each repo: rept (`fdd5d43`), trip (`b90176d`), appr-final (`ef5956c`); 56 to 63 files each, about 1.6k lines removed per app. The apps' local copies differed only in import order, the wording and the storage prefix, so nothing had to be folded into the entries. Bundles: rept 926.1 kB (906.5), trip 957.2 kB (943.8), appr 934.5 kB (929.4); the growth is the loading logo, which tsup inlines as a data URL (about 15 kB), now also in rept and trip.
