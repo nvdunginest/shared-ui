@@ -52,7 +52,7 @@ Rule: **new code goes in separate subpath entries**, not in the main barrel. The
 | `./ui` (new) | `TitleBar`, `ExpandingTabBar`, `CollapsedPanelStrip`, `FooterIconNav`, `UserInfo`, `SelectUser(Chip)`, `avatarColor`, `MasterPage`, `AppLayout`, `ResponsiveWrapper`, `useDeviceType`, `BackToListButton`, `panelPersistence`, `Loading` + `BrandedLoading` (replace the dark `ModuleLoadingOverlay`), `DebugFrameLabel`, navigation helpers (`Navigator`, `navigateTo`, `useBackToList`, `useUnsavedChangesGuard`); per-app wording and storage keys through `configureUi({ documentName, panelStoragePrefix })`. Not in it yet: `GlobalCompanySelector` (needs `GlobalContext`, Phase 4) and the trip/idoc/odoc-only `AclCheck`, `Forbidden`, `Section`, `CollapsedSection`, `PropertyRender*` | medium, no CKEditor |
 | `./editor` (new) | CKEditor stack: `CustomView`, `MinimalEditor`, `ReferenceLinks*`, `FileAttachmentPlugin`, `pasteAutoLink`, `safeLinkOpening`, css | heavy, lazy |
 | `./file-viewer` (new) | `FileViewer`, `PdfViewer`, `OfficeViewer` | heavy, lazy |
-| `./document-kit` (new) | the workflow engine: `createDocumentHub(config)` (SignalR), list shell (`ListHost`, `OutlookShell`, `DocumentListPanel/Mobile/Screen`, `DocumentTable`, filters, `ItemView`), detail shell (`Main`, `Extra`, discussion, attachments, history, action bar and the common actions), common contexts | heavy, lazy |
+| `./document-kit` (new) | the document workflow: list side done (Phase 4: `GlobalProvider/GlobalLoader`, `DocumentListProvider`, `GlobalCompanySelector`, `ListHost`, `OutlookShell`, `DocumentListPanel/Mobile/Screen`, `DocumentTable`, filters; `<DocumentKitProvider config>`), detail side to come (Phase 5: `Main`, `Extra`, discussion, attachments, history, action bar and the common actions) | **light, bundled into each app** (changed from heavy, see Phase 4 status) |
 | main `.` | stays as is; only re-exports kept for compatibility | unchanged |
 
 `./document-kit` takes a single typed config instead of forks:
@@ -98,6 +98,16 @@ Order by risk: identical code first, near-identical next, behaviour-bearing code
 **Phase 7 - Guard rails (1 day)**: lint rule or CI check that forbids re-creating a file whose name exists in shared-ui; update each app's `CLAUDE.md` / `docs/07-development-guide.md` (new components go to shared-ui first); changelog entry per app.
 
 Rough effort: 5-7 weeks for one developer, phases 1-3 deliver most of the visual consistency in ~2 weeks.
+
+### Phase 4 status (2026-10-22)
+
+`./document-kit` (list side) is in shared-ui and rept, trip and appr-final use it (rept `831bce2`, trip, appr-final; all on main, not pushed). Each app keeps only its row components (`ItemView`, `WaitingItemView`) and one file, `application/documentKit.config.tsx`: tabs (labels, titles, api methods, row component, which filters), statuses, menu, waiting-counts call, company storage key, page-size wording, which master data to load (`sectors`, principal positions as `scopes` or `ids`) and three flags (`autoOpenFirst`, `backToShell`, `createShortcut`). About 3.7k lines left rept alone; the three bundles are 578 to 605 kB (the list code moved from the app into the entry, nothing is shared at runtime).
+
+**Decision D1 amended for this entry:** `./document-kit` is a light entry bundled into each app, not shared through the shell. It owns React contexts (`GlobalContext`, `DocumentListContext`) and reads the `platform-kit` AppContext and the `signalr` context. A copy provided by the shell would create its own instances of those contexts and never see the app's providers. Sharing it would also need `platform-kit` and `signalr` shared singletons. If the byte saving ever matters, share all three together. `./editor` and `./file-viewer` stay shell-provided (they hold no context of the app).
+
+Behaviour reconciled (the three copies had drifted): the fixes made in appr (parallel loading of sectors, projects and companies; the remembered company is no longer cleared while the list loads; list loading is local, not a module-wide overlay; stable navigate, no refetch when opening another document) now apply to rept and trip too. Auto-open of the first document uses trip's rules (once per entry into the module, only on a wide frame at "/", not on a deep link or an empty result) for appr and trip; rept keeps it off. The "create" and "open full list" buttons of rept and the back arrow of the full list screen (rept and trip) are flags, set as before; appr has neither and appr's screen gets trip's footer icons (empty when the menu has no extra entry). Flip a flag in an app's config to unify.
+
+Not moved: the row components, `documents.controller`, `DocumentStatusEnum`, `documents.helper` (domain), and trip's unused `pages/Home/Home.tsx`.
 
 ### Phase 3 status (2026-10-22)
 
