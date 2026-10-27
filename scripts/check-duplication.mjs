@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Measures how much frontend code the document apps duplicate (docs/consolidation-plan.md).
+// Measures how much frontend code the document apps duplicate (history: legacy/docs/consolidation-plan.md).
 //
 //   node scripts/check-duplication.mjs            summary per domain (redundant lines by similarity class)
 //   node scripts/check-duplication.mjs --files    + one line per file that exists in >= 2 apps

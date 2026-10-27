@@ -19,4 +19,4 @@ jsdom notes for the CSS assertions in `tests/module-contract`: styled-components
 `font-size` use `reset="none"`; jsdom 30 normalises values (`inset:0` -> `0px`, `calc(100cqw - 16px)` -> `calc(-16px + 100cqw)`)
 and drops `!important` rules from the CSSOM, so those assertions accept both forms.
 
-`scripts/mutation-check.py` applies ~30 hand-written mutants to `src/module-contract` and `src/dev-shell` and expects the suite to turn red for each (one known-equivalent mutant is listed in the script).
+`legacy/scripts/mutation-check.py` (retired; the shell keeps its own mutation scripts) applied ~30 hand-written mutants to `src/module-contract` and `src/dev-shell` and expects the suite to turn red for each (one known-equivalent mutant is listed in the script).

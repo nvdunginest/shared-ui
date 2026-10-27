@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Entry policy (docs/consolidation-plan.md, section 3). Reads dist/ after `npm run build`.
+// Entry policy (docs/STATUS.md). Reads dist/ after `npm run build`.
 //
 //  strict  entries (module-contract, dev-shell): import only a short list of external packages and nothing relative
 //          (contract 1, 9.4): no relative import, no shared chunk (tsup `splitting` would tie the entry to the barrel).

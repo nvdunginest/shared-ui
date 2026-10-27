@@ -22,7 +22,7 @@ Tests live in `tests/` (see `tests/README.md`). The existing entries (`.`, `./pl
 `scripts/check-exports.mjs` (public surface of the entries and the bytes of `src/index.ts` and `src/layout/*`): do not edit
 those files to "fix" them; new code goes into new entries.
 
-### Adding an entry (docs/consolidation-plan.md, section 3)
+### Adding an entry (docs/STATUS.md, "Entries")
 
 1. Create `src/<entry>/index.ts`; add it to `tsup.config.ts` (`entry`) and `package.json` (`exports`).
 2. List it in the `POLICY` table of `scripts/check-entry-isolation.mjs`: `light` (ui, theme, mdms: must not reach CKEditor, the PDF
@@ -113,4 +113,4 @@ entry in `tsup.config.ts` (`entry`) and `package.json` (`exports`).
 
 ### Publishing
 
-Publishes to npm (or GitHub Packages — see INTEGRATION.md §6). The `dist/` directory is already committed; `files` in `package.json` restricts the published artifact to `dist/` only.
+Publishes to npm (or GitHub Packages — see docs/STATUS.md; the legacy INTEGRATION.md is in legacy/). `dist/` is gitignored and built by `npm run build`; `files` in `package.json` restricts the published artifact to `dist/` only.
