@@ -1,17 +1,29 @@
 import { useDocumentKit } from "../../config";
 import { getUiConfig } from "../../../ui";
 import { extractApiErrorMessage } from "../../helpers/apiError.helper";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { useDocumentContext } from "../../context/document/index";
 import { useGlobalContext } from "../../index";
 import { useAppContext } from "../../../platform-kit";
 import { useModuleFeedback } from "@ptht365/shared-ui/module-contract";
-import { Input, Modal } from "antd";
+import { Input, Modal, Skeleton } from "antd";
+import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
+import type { MinimalEditorRef } from "../../../editor";
 import { UUID } from "crypto";
+import styled from "styled-components";
 
 import ActionBarButton from "./ActionBarButton";
 import { CheckActor } from "./AddAttachmentAction";
+import { extractMentions } from "../sections/discussion/CommentAction";
+
+const MinimalEditor = lazy(() => import("@ptht365/shared-ui/editor").then((m) => ({ default: m.MinimalEditor })));
+
+// Only used to tell whether the editor holds any text.
+const htmlToPlainText = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html.replace(/<\/(p|div|li|h\d)>|<br\s*\/?>/gi, "\n"), "text/html");
+  return (doc.body.textContent ?? "").replace(/\u00a0/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+};
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -27,6 +39,9 @@ export default function ApproveAction(): JSX.Element {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [approvalMessage, setApprovalMessage] = useState("");
+  const editorRef = useRef<MinimalEditorRef>(null);
+  const { users } = useSharedUsers();
+  const withMentions = detail.approvalMentions === true;
 
   useEffect(() => {
     if (state.document === null) { setEnable(false); return; }
@@ -52,12 +67,16 @@ export default function ApproveAction(): JSX.Element {
   const handleClose = () => {
     setOpen(false);
     setApprovalMessage("");
+    editorRef.current?.setData("");
   };
 
   const handleOk = async () => {
     if (state.document === null) return;
 
-    if (!approvalMessage.trim()) {
+    const html = withMentions ? editorRef.current?.getData() ?? "" : "";
+    const hasOpinion = withMentions ? htmlToPlainText(html) !== "" : approvalMessage.trim() !== "";
+
+    if (!hasOpinion) {
       message.warning(`Vui lòng nhập nội dung ${detail.wording.approveVerb}`);
       return;
     }
@@ -65,7 +84,9 @@ export default function ApproveAction(): JSX.Element {
     setIsLoading(true);
     try {
       await detail.api.approve(state.document.id, {
-        approvalMessage: approvalMessage || undefined,
+        // With mentions the opinion goes as the editor's HTML (the backend sanitizes it; the history renders it).
+        approvalMessage: withMentions ? html : approvalMessage.trim(),
+        ...(withMentions ? { mentionedUserIds: extractMentions(html, users) } : {}),
       });
       message.success(`${cap(detail.wording.approveVerb)} thành công`);
       handleClose();
@@ -100,13 +121,36 @@ export default function ApproveAction(): JSX.Element {
         cancelText="Hủy"
         confirmLoading={isLoading}
       >
-        <Input.TextArea
-          rows={4}
-          placeholder={`Ý kiến ${detail.wording.approveVerb} (bắt buộc)`}
-          value={approvalMessage}
-          onChange={(e) => setApprovalMessage(e.target.value)}
-        />
+        {withMentions ? (
+          <Suspense fallback={<Skeleton.Input active block size="large" />}>
+            <EditorBoxStl>
+              <MinimalEditor disable={isLoading} initialData="" ref={editorRef} />
+            </EditorBoxStl>
+            <HintStl>Ý kiến {detail.wording.approveVerb} (bắt buộc). Nhập @ để nhắc thêm người, họ sẽ nhận thông báo như các thành viên khác.</HintStl>
+          </Suspense>
+        ) : (
+          <Input.TextArea
+            rows={4}
+            placeholder={`Ý kiến ${detail.wording.approveVerb} (bắt buộc)`}
+            value={approvalMessage}
+            onChange={(e) => setApprovalMessage(e.target.value)}
+          />
+        )}
       </Modal>
     </>
   );
 }
+
+const EditorBoxStl = styled.div`
+  min-height: 120px;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+`;
+
+const HintStl = styled.div`
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+`;

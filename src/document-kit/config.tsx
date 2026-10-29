@@ -112,6 +112,8 @@ export type DocumentDetailConfig = {
   };
   /** History wording per activity type. */
   activities: ActivityRenderConfig[];
+  /** The approval opinion accepts @mentions, sent as `mentionedUserIds` (the backend must handle them). */
+  approvalMentions?: boolean;
 };
 
 export type DocumentKitConfig = {

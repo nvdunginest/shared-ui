@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, Suspense, lazy } from "react";
 import { useDocumentSections } from "../../config";
 import { getActivityActorName, parseActorSnapshot } from "../../helpers/activities.helper";
 import { ActivityType } from "../../models/ActivityType";
@@ -9,6 +9,10 @@ import { styled } from "styled-components";
 
 import { PersonAvatar } from "../../../ui";
 import { colors } from "../../../theme";
+
+// ckeditor5 is heavy: load it on demand, only for opinions that carry mentions (stored as HTML).
+const CustomView = lazy(() => import("@ptht365/shared-ui/editor").then((m) => ({ default: m.CustomView })));
+const isHtmlContent = (content: string): boolean => /^\s*<(p|span|div|ul|ol)\b/i.test(content);
 
 const formatDateString = "hh:mm dd/MM/yyyy";
 
@@ -35,7 +39,15 @@ const BaseActivityItem: FC<Props> = ({ activity }: Props) => {
         {positionName && <PositionStl>{positionName}</PositionStl>}
         <ActionTextStl>{config.text}</ActionTextStl>
         {config.showContent && activity.content && (
-          <NoteStl $tone={getNoteTone(activity.activityType)}>{activity.content}</NoteStl>
+          <NoteStl $tone={getNoteTone(activity.activityType)}>
+            {isHtmlContent(activity.content) ? (
+              <Suspense fallback={activity.content}>
+                <CustomView data={activity.content} />
+              </Suspense>
+            ) : (
+              activity.content
+            )}
+          </NoteStl>
         )}
         <TimeStl>{formatDate(new Date(activity.createdTime), formatDateString)}</TimeStl>
       </MainStl>
