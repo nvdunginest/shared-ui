@@ -34,6 +34,7 @@ export { default as DocumentListPanel } from "./layout/DocumentListPanel";
 export { default as DocumentListMobile } from "./layout/DocumentListMobile";
 export { default as DocumentListScreen } from "./layout/DocumentListScreen";
 export { default as DocumentTable } from "./home/DocumentTable";
+export { default as CopyDocumentButton } from "./home/CopyDocumentButton";
 
 // ---- detail side: one document (Phase 5)
 export type { DocumentBase, DocumentCore } from "./models/DocumentBase";

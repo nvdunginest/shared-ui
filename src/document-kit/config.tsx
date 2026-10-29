@@ -52,6 +52,8 @@ export type DocumentActionApi = {
   cancel(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
   giveback(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
   returnToSubmitter(id: UUID, body: any): Promise<unknown>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  /** "Sao chép" on a list item: creates a new draft from the content and info of the document, returns its id. */
+  copy?(id: UUID, body: { positionId: UUID; departmentId: UUID }): Promise<UUID>;
 };
 
 /** Which statuses allow what: the business rules that differ from one app to the other. */
