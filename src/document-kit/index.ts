@@ -4,13 +4,11 @@ export {
   DocumentKitProvider,
   DocumentSectionsProvider,
   findCreateFeature,
-  getCommentMode,
   getFooterFeatures,
   useDocumentKit,
   useDocumentSections,
 } from "./config";
 export type {
-  CommentMode,
   DocumentReadApi,
   DocumentSectionsConfig,
   DocumentActionApi,

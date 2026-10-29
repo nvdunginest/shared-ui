@@ -1,4 +1,3 @@
-import { getCommentMode, useDocumentSections } from "../../../config";
 import { lazy, Suspense, useRef, useState } from "react";
 import {
   GlobalOutlined,
@@ -32,8 +31,6 @@ type Props = {
   onPosted?: () => void;
 };
 
-const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
-
 export function extractMentions(html: string, users: ISharedUser[]): UUID[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
@@ -55,14 +52,9 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
   const { users } = useSharedUsers();
   const { state } = useDocumentContext();
   const { message } = useModuleFeedback();
-  const sections = useDocumentSections();
   const id = state.document?.id;
-  const mode = state.document ? getCommentMode(sections, state.document) : "locked";
   const [loading, setLoading] = useState(false);
-  const [isPrivateInput, setIsPrivate] = useState(false);
-  // A finished document only accepts private comments.
-  const isFinished = mode === "private";
-  const isPrivate = isFinished || isPrivateInput;
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const ref = useRef<MinimalEditorRef>(null);
   const { onAttachmentClick, modal } = useCommentAttachmentPreview();
@@ -91,11 +83,7 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
     } catch (error) {
       const status = isAxiosError(error) ? error.response?.status : undefined;
       const documentName = getUiConfig().documentName;
-      if (status === 400) {
-        message.error(
-          `${capitalize(documentName)} đã kết thúc, chỉ có thể bình luận riêng tư. Nội dung bạn vừa soạn vẫn được giữ nguyên trong khung.`,
-        );
-      } else if (status === 404) {
+      if (status === 404) {
         message.error(`Bạn không (còn) có quyền bình luận vào ${documentName} này.`);
       } else {
         message.error(extractApiErrorMessage(error, "Có lỗi xảy ra, vui lòng thử lại."));
@@ -104,14 +92,6 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
       setLoading(false);
     }
   };
-
-  if (mode === "locked") {
-    return (
-      <DisabledNoticeStl>
-        <LockOutlined /> {capitalize(getUiConfig().documentName)} đã bị hủy, không thể bình luận.
-      </DisabledNoticeStl>
-    );
-  }
 
   return (
     <ContainerStl>
@@ -137,7 +117,6 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
       </WrapperStl>
       {!parentComment && (
         <PrivacySwitchStl
-          disabled={isFinished}
           checkedChildren={
             <span>
               <LockOutlined /> Riêng tư
@@ -189,16 +168,4 @@ const ContainerStl = styled.div`
   flex-direction: column;
   gap: 4px;
   align-items: flex-end;
-`;
-
-const DisabledNoticeStl = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  color: ${colors.textTertiary};
-  font-size: 13px;
-  background: ${colors.bgPage};
-  border-radius: 16px;
 `;

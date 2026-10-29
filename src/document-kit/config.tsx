@@ -63,14 +63,11 @@ export type DocumentStatusRules = {
   notEnded: number[];
   /** The creator or processor may still cancel it. */
   cancelable: number[];
-  /** Cancelled: comments are locked. Every status in neither `cancelled` nor `finished` takes comments as usual. */
+  /** Cancelled. */
   cancelled: number[];
-  /** Ended: only private comments are accepted. */
+  /** Ended. */
   finished: number[];
 };
-
-/** How the discussion treats comments on a document. */
-export type CommentMode = "open" | "private" | "locked";
 
 /** The calls the detail sections make (an app without document actions only needs these; reminders are optional). */
 export type DocumentReadApi = Pick<DocumentActionApi, "getById"> & Partial<Pick<DocumentActionApi, "dismissRemind">>;
@@ -82,24 +79,10 @@ export type DocumentReadApi = Pick<DocumentActionApi, "getById"> & Partial<Pick<
  */
 export type DocumentSectionsConfig = {
   api: DocumentReadApi;
-  statuses: Pick<DocumentStatusRules, "notEnded" | "cancelled" | "finished">;
-  /** Replaces the status lists for the comment rule, e.g. for documents that have no status. */
-  commentMode?: (document: DocumentCore) => CommentMode;
+  statuses: Pick<DocumentStatusRules, "notEnded">;
   /** History wording per activity type. */
   activities: ActivityRenderConfig[];
 };
-
-/**
- * Comment rule of the discussion: a cancelled document is locked, an ended one takes private comments only, every other
- * status is open. A document without a status is open unless the app gives `commentMode`.
- */
-export function getCommentMode(config: DocumentSectionsConfig, document: DocumentCore): CommentMode {
-  if (config.commentMode) return config.commentMode(document);
-  const status = document.status;
-  if (status === undefined) return "open";
-  if (config.statuses.cancelled.includes(status)) return "locked";
-  return config.statuses.finished.includes(status) ? "private" : "open";
-}
 
 export type DocumentDetailConfig = {
   api: DocumentActionApi;
