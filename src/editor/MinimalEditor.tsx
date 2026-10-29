@@ -42,6 +42,7 @@ import styled, { createGlobalStyle } from "styled-components";
 
 import "ckeditor5/ckeditor5.css";
 
+import { colors } from "../theme";
 import { getAvatarColor } from "../ui/components/avatarColor";
 
 import FileAttachmentPlugin from "./plugins";
@@ -261,7 +262,7 @@ const MinimalEditor = forwardRef<MinimalEditorRef, Props>(function CustomEditorF
                   const shortName = (() => {
                     const name = item.displayName.trim();
                     const parts = name.split(" ");
-                    return `${name[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`;
+                    return `${name[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`.toUpperCase();
                   })();
 
                   const container = document.createElement("div");
@@ -271,21 +272,22 @@ const MinimalEditor = forwardRef<MinimalEditorRef, Props>(function CustomEditorF
                   const avatar = document.createElement("div");
                   avatar.textContent = shortName;
                   avatar.style.cssText =
-                    `flex-shrink:0;width:32px;height:32px;border-radius:50%;background:${getAvatarColor(item.jobTitle)};color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center`;
+                    `flex-shrink:0;width:32px;height:32px;border-radius:50%;background:${getAvatarColor(item.jobTitle)};color:#fff !important;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center`;
 
                   const content = document.createElement("div");
                   content.style.cssText =
                     "display:flex;flex-direction:column;flex-grow:1;overflow:hidden;min-width:0";
 
                   const main = document.createElement("span");
-                  main.textContent = `${item.displayName} (${item.mail})`;
+                  main.textContent = item.displayName;
                   main.style.cssText =
-                    "font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+                    "font-weight:600;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
 
                   const footer = document.createElement("span");
-                  footer.textContent = `${item.department ?? "N/A"} (${item.jobTitle ?? "N/A"})`;
+                  // "Người" kind: name + e-mail, no directory title (see ui/components/person/personText.ts).
+                  footer.textContent = item.mail || "N/A";
                   footer.style.cssText =
-                    "font-size:12px;color:inherit;opacity:0.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+                    "font-size:14px;color:rgba(0,0,0,0.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
 
                   content.appendChild(main);
                   content.appendChild(footer);
@@ -337,30 +339,40 @@ const MinimalEditor = forwardRef<MinimalEditorRef, Props>(function CustomEditorF
 export default MinimalEditor;
 
 // The mention panel is attached to <body>, outside WrapperStl, so it needs global styles.
-// The selected/hovered row uses a light background so the dark text stays readable.
+// It mimics the antd Select dropdown of SelectUser (same panel, row padding, hover and selected colors)
+// so picking someone looks the same in the follower box and in a comment.
 const MentionPanelStyle = createGlobalStyle`
   .ck.ck-mentions {
-    padding: 6px !important;
+    padding: 4px !important;
+    background: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+      0 9px 28px 8px rgba(0, 0, 0, 0.05) !important;
   }
 
   .ck.ck-mentions .ck-list__item {
-    margin-bottom: 2px;
+    margin-bottom: 0;
   }
 
   .ck.ck-mentions .ck-button {
-    padding: 6px 10px !important;
-    border-radius: 6px !important;
+    padding: 5px 12px !important;
+    border-radius: 4px !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+  }
+
+  .ck.ck-mentions .ck-button:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
   }
 
   .ck.ck-mentions .ck-button.ck-on,
-  .ck.ck-mentions .ck-button:hover,
   .ck.ck-mentions .ck-button.ck-on:hover {
-    background: #e6f0ff !important;
+    background: ${colors.primaryBg} !important;
   }
 
   .ck.ck-mentions .ck-button.ck-on,
   .ck.ck-mentions .ck-button.ck-on * {
-    color: #1f1f1f !important;
+    color: rgba(0, 0, 0, 0.88) !important;
   }
 `;
 

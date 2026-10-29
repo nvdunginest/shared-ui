@@ -6,12 +6,12 @@ import { useDocumentSections } from "../../../config";
 import { getActivityActorName, parseActorSnapshot } from "../../../helpers/activities.helper";
 import IActivity from "../../../models/IActivity";
 import { useAppContext } from "../../../../platform-kit";
-import { formatDate, getShortName, isEmptyOrSpaces } from "../../../../text-utils";
+import { formatDate, isEmptyOrSpaces } from "../../../../text-utils";
 import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
-import { Avatar, Popconfirm, Typography } from "antd";
+import { Popconfirm } from "antd";
 import { styled } from "styled-components";
 
-import { getAvatarColorForUser } from "../../../../ui";
+import { PersonAvatar } from "../../../../ui";
 import { colors } from "../../../../theme";
 
 const formatDateString = "hh:mm dd/MM/yyyy";
@@ -68,15 +68,11 @@ const BaseActivityItem: FC<Props> = ({
   return config !== undefined ? (
     <WrapperStl>
       <AvatarWrapStl>
-        <Avatar style={{ backgroundColor: getAvatarColorForUser(users, { id: activity.userId, name: displayName }) }}>
-          {getShortName(displayName)}
-        </Avatar>
+        <PersonAvatar name={displayName} userId={activity.userId} />
       </AvatarWrapStl>
       <MainStl>
-        <NameStl>
-          <Typography.Text strong>{displayName}</Typography.Text>
-          {positionName && <PositionStl> ({positionName})</PositionStl>}
-        </NameStl>
+        <NameStl>{displayName}</NameStl>
+        {positionName && <PositionStl>{positionName}</PositionStl>}
         <BubbleStl $isRecalled={activity.isRecalled}>{children}</BubbleStl>
         <MetaStl>
           <span>{formatDate(new Date(activity.createdTime), formatDateString)}</span>
@@ -136,12 +132,14 @@ const MainStl = styled.div`
 
 const NameStl = styled.div`
   font-size: 14px;
+  font-weight: 700;
   line-height: 20px;
   color: ${colors.textHeading};
 `;
 
-const PositionStl = styled.span`
+const PositionStl = styled.div`
   font-size: 12px;
+  line-height: 18px;
   color: ${colors.textTertiary};
 `;
 

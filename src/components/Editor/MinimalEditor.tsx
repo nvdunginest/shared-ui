@@ -140,12 +140,12 @@ const MinimalEditor = forwardRef(function MinimalEditorForwardRef(
                     "display:flex;flex-direction:column;flex-grow:1;overflow:hidden;min-width:0";
 
                   const main = document.createElement("span");
-                  main.textContent = `${item.displayName} (${item.mail})`;
+                  main.textContent = item.displayName;
                   main.style.cssText =
                     "font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
 
                   const footer = document.createElement("span");
-                  footer.textContent = `${item.department ?? "N/A"} (${item.jobTitle ?? "N/A"})`;
+                  footer.textContent = item.mail || "N/A";
                   footer.style.cssText =
                     "font-size:12px;color:rgba(0,0,0,0.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
 

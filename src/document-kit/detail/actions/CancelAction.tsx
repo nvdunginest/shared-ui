@@ -88,6 +88,7 @@ export default function CancelAction(): JSX.Element {
         open={open}
         onOk={handleOk}
         onCancel={handleClose}
+        closeIcon={false}
         okText="Xác nhận hủy"
         okButtonProps={{ danger: true }}
         cancelText="Đóng"

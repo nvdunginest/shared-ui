@@ -8,6 +8,14 @@ export type { ExpandingTabItem } from "./components/ExpandingTabBar";
 export { default as TitleBar } from "./components/TitleBar";
 export { default as UserInfo } from "./components/UserInfo";
 export { getAvatarColor, getAvatarColorForUser } from "./components/avatarColor";
+export { default as PersonAvatar } from "./components/person/PersonAvatar";
+export type { PersonAvatarSize } from "./components/person/PersonAvatar";
+export {
+  UNASSIGNED_HOLDER_LABEL,
+  getPersonSearchText,
+  getPositionHolderLabel,
+  getPositionSubtitle,
+} from "./components/person/personText";
 export { default as SelectUser } from "./components/SelectUser";
 export { default as SelectUserChip } from "./components/SelectUserChip";
 export { default as AppLayout } from "./layout/AppLayout";

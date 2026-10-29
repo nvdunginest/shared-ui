@@ -8,7 +8,7 @@ import { SelectUserChip } from "../../../ui";
 import { POPOVER_CONTENT_WIDTH } from "../../../theme";
 import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
 import { PROCESSING } from "../../../platform-kit";
-import { Button, Flex, Form, Popover, Space } from "antd";
+import { Button, Flex, Form, Popover } from "antd";
 
 import { CheckActor } from "./AddAttachmentAction";
 
@@ -23,8 +23,8 @@ export default function AddFollowersAction(): JSX.Element {
   const [enable, setEnable] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const handleOpenChange = () => {
-    setOpen(!open);
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
   };
 
   const handleClearForm = () => {
@@ -63,51 +63,40 @@ export default function AddFollowersAction(): JSX.Element {
     setEnable(true);
   }, [state.document, userId, departments]);
 
+  if (!enable || !users || !state.document) return <></>;
+
   return (
-    <Space size={1}>
-      {enable && users && state.document && (
-        <>
-          <Popover
-            title="Thêm người theo dõi"
-            content={
-              <Flex vertical>
-                <div style={{ width: POPOVER_CONTENT_WIDTH }}>
-                  <Form form={form} size="small">
-                    <Form.Item name="userIds">
-                      <SelectUserChip mode="multiple" />
-                    </Form.Item>
-                  </Form>
-                </div>
-                <div>
-                  <Button
-                    type="primary"
-                    size="small"
-                    disabled={!enable}
-                    onClick={handleSubmit}
-                    icon={<SendOutlined />}
-                  >
-                    Gửi
-                  </Button>
-                </div>
-              </Flex>
-            }
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-          />
-          <Button
-            icon={<PlusCircleOutlined />}
-            type="primary"
-            size="small"
-            // loading={loading}
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Thêm
+    <Popover
+      // The submit button lives in the title bar: the user dropdown opens over the body and would hide it.
+      title={
+        <Flex align="center" justify="space-between" gap={12}>
+          <span>Thêm người theo dõi</span>
+          <Button type="primary" size="small" onClick={handleSubmit} icon={<SendOutlined />}>
+            Gửi
           </Button>
-        </>
-      )}
-    </Space>
+        </Flex>
+      }
+      content={
+        <div style={{ width: POPOVER_CONTENT_WIDTH }}>
+          <Form form={form} size="middle">
+            <Form.Item name="userIds" style={{ marginBottom: 0 }}>
+              <SelectUserChip mode="multiple" size="middle" />
+            </Form.Item>
+          </Form>
+        </div>
+      }
+      trigger="click"
+      open={open}
+      onOpenChange={handleOpenChange}
+    >
+      <Button
+        icon={<PlusCircleOutlined />}
+        type="primary"
+        size="small"
+        style={{ verticalAlign: "middle" }}
+      >
+        Thêm
+      </Button>
+    </Popover>
   );
 }

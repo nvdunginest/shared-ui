@@ -5,14 +5,12 @@ import { useEffect, useState } from "react";
 import { SwapOutlined } from "@ant-design/icons";
 import { useDocumentContext } from "../../context/document/index";
 import { useGlobalContext } from "../../index";
-import { filterChainActiveDepartments } from "../../helpers/selectOptions.helper";
 import { useAppContext } from "../../../platform-kit";
-import { removeVietnameseTones } from "../../../text-utils";
 import { useModuleFeedback } from "@ptht365/shared-ui/module-contract";
-import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
-import { Input, Modal, Select } from "antd";
+import { Input, Modal } from "antd";
 import { UUID } from "crypto";
 
+import SelectPositionHolder from "../../components/SelectPositionHolder";
 import ActionBarButton from "./ActionBarButton";
 import { CheckActor } from "./AddAttachmentAction";
 
@@ -21,7 +19,6 @@ export default function TransferAction(): JSX.Element {
   const { detail } = useDocumentKit();
   const docName = getUiConfig().documentName;
   const { userId } = useAppContext().state;
-  const { users } = useSharedUsers();
   const { departments, companies } = useGlobalContext().globalState;
   const { state, fetchDocument } = useDocumentContext();
 
@@ -87,43 +84,8 @@ export default function TransferAction(): JSX.Element {
     }
   };
 
-  // Mode B (selectable): new assignee's whole chain must be active (position, department, ancestors, company).
+  // New assignee's whole chain must be active (position, department, ancestors, company): SelectPositionHolder applies it.
   const documentCompany = companies.find((c) => c.id === state.document?.companyId);
-  const chainActiveDepartments = filterChainActiveDepartments(
-    departments.filter((d) => d.companyId === state.document?.companyId),
-    documentCompany?.isActive ?? true,
-  );
-
-  const positionOptions = state.document
-    ? chainActiveDepartments
-      .map((dept) => ({
-        label: dept.departmentName,
-        options: dept.positions
-          .filter((p) => p.isActive && p.userId !== null && p.id !== state.document!.processorPositionId)
-          .map((p) => {
-            const user = users.find((u) => u.id === p.userId);
-            const canApprove = p.tierId === state.document!.tierId;
-            return {
-              label: `${p.positionName}${user ? ` — ${user.displayName}` : ""}${canApprove ? ` ✅ Có thể ${detail.wording.approveVerb}` : ""}`,
-              searchText: `${p.positionName} ${user?.displayName ?? ""} ${user?.mail ?? ""}`,
-              value: p.id,
-            };
-          }),
-      }))
-      .filter((g) => g.options.length > 0)
-    : [];
-
-  const filterPositionOption = (input: string, option?: { label?: string; searchText?: string }) => {
-    if (!option) return false;
-
-    const normalizedInput = removeVietnameseTones(input).toLowerCase().trim();
-    if (!normalizedInput) return true;
-
-    const normalizedLabel = removeVietnameseTones(option.label ?? "").toLowerCase();
-    const normalizedSearchText = removeVietnameseTones(option.searchText ?? "").toLowerCase();
-
-    return normalizedLabel.includes(normalizedInput) || normalizedSearchText.includes(normalizedInput);
-  };
 
   if (!enable) return <></>;
 
@@ -151,14 +113,16 @@ export default function TransferAction(): JSX.Element {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
             <div style={{ marginBottom: 4, fontWeight: 500 }}>Người nhận xử lý</div>
-            <Select
-              style={{ width: "100%" }}
-              placeholder="Tìm theo tên, email, chức vụ..."
-              options={positionOptions}
-              value={selectedPositionId}
-              onChange={(v) => setSelectedPositionId(v as UUID)}
-              showSearch
-              filterOption={filterPositionOption}
+            <SelectPositionHolder
+              departments={departments}
+              companyId={state.document?.companyId as UUID | undefined}
+              companyActive={documentCompany?.isActive ?? true}
+              excludePositionId={state.document?.processorPositionId as UUID | undefined}
+              badgeOf={(p) =>
+                p.tierId === state.document?.tierId ? `Có thể ${detail.wording.approveVerb}` : null
+              }
+              value={selectedPositionId ?? undefined}
+              onChange={(v) => setSelectedPositionId((v ?? null) as UUID | null)}
             />
           </div>
           <div>

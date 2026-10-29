@@ -3,12 +3,11 @@ import { useDocumentSections } from "../../config";
 import { getActivityActorName, parseActorSnapshot } from "../../helpers/activities.helper";
 import { ActivityType } from "../../models/ActivityType";
 import IActivity from "../../models/IActivity";
-import { formatDate, getShortName } from "../../../text-utils";
+import { formatDate } from "../../../text-utils";
 import { useSharedUsers } from "@ptht365/shared-ui/shared-users";
-import { Avatar } from "antd";
 import { styled } from "styled-components";
 
-import { getAvatarColorForUser } from "../../../ui";
+import { PersonAvatar } from "../../../ui";
 import { colors } from "../../../theme";
 
 const formatDateString = "hh:mm dd/MM/yyyy";
@@ -30,9 +29,7 @@ const BaseActivityItem: FC<Props> = ({ activity }: Props) => {
 
   return config !== undefined ? (
     <WrapperStl>
-      <Avatar style={{ backgroundColor: getAvatarColorForUser(users, { id: activity.userId, name: displayName }), flex: "0 0 auto" }}>
-        {getShortName(displayName)}
-      </Avatar>
+      <PersonAvatar name={displayName} userId={activity.userId} />
       <MainStl>
         <NameStl>{displayName}</NameStl>
         {positionName && <PositionStl>{positionName}</PositionStl>}

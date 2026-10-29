@@ -80,6 +80,7 @@ export default function RejectAction(): JSX.Element {
         open={open}
         onOk={handleOk}
         onCancel={handleClose}
+        closeIcon={false}
         okText="Từ chối"
         okButtonProps={{ danger: true }}
         cancelText="Đóng"

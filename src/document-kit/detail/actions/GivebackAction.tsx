@@ -100,6 +100,7 @@ export default function GivebackAction(): JSX.Element {
         open={open}
         onOk={handleOk}
         onCancel={handleClose}
+        closeIcon={false}
         okText="Xác nhận trả lại"
         cancelText="Đóng"
         confirmLoading={isLoading}

@@ -43,3 +43,19 @@ export function resolveActor(
     email: user?.mail,
   };
 }
+
+/**
+ * The org-chart role a user holds (for people who are tied to a user, not to a position, such as a
+ * document's secretaries). Prefers an active position of `companyId`; undefined when they hold none.
+ */
+export function findHeldPosition(
+  userId: string,
+  departments: IDepartment[],
+  companyId?: string | null,
+): { positionName: string; departmentName: string } | undefined {
+  const held = departments
+    .filter((d) => !companyId || d.companyId === companyId)
+    .flatMap((d) => d.positions.filter((p) => p.userId === userId).map((p) => ({ p, d })));
+  const best = held.find(({ p, d }) => p.isActive && d.isActive) ?? held[0];
+  return best ? { positionName: best.p.positionName, departmentName: best.d.departmentName } : undefined;
+}
