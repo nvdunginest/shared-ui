@@ -1,7 +1,9 @@
-import IActivity from "../../../models/IActivity";
 import { lazy, Suspense } from "react";
 import { Skeleton } from "antd";
 import { styled } from "styled-components";
+
+import { useCommentAttachmentPreview } from "../../../components/useCommentAttachmentPreview";
+import IActivity from "../../../models/IActivity";
 
 // ckeditor5 is heavy: load it on demand, not with the module.
 const CustomView = lazy(() => import("@ptht365/shared-ui/editor").then((m) => ({ default: m.CustomView })));
@@ -11,11 +13,14 @@ type Props = {
 };
 
 export default function CommentContent({ activity }: Props): JSX.Element {
+  const { onAttachmentClick, modal } = useCommentAttachmentPreview();
+
   return (
     <WrapperStl>
       <Suspense fallback={<Skeleton active paragraph={{ rows: 1 }} title={false} />}>
-        <CustomView data={activity.content} />
+        <CustomView data={activity.content} onAttachmentClick={onAttachmentClick} />
       </Suspense>
+      {modal}
     </WrapperStl>
   );
 }
@@ -23,5 +28,6 @@ export default function CommentContent({ activity }: Props): JSX.Element {
 const WrapperStl = styled.div`
   position: relative;
   width: fit-content;
+  max-width: 100%;
   overflow: hidden;
 `;

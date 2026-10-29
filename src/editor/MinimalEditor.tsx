@@ -41,7 +41,6 @@ import { UUID } from "crypto";
 import styled, { createGlobalStyle } from "styled-components";
 
 import "ckeditor5/ckeditor5.css";
-import "./plugins/attachment-widget.css";
 
 import { getAvatarColor } from "../ui/components/avatarColor";
 
@@ -51,6 +50,8 @@ import { attachSafeLinkOpening } from "./safeLinkOpening";
 type Props = {
   initialData: string;
   disable?: boolean;
+  /** Called when an attached file in the editor is clicked; return true when it was handled. */
+  onAttachmentClick?: (attachment: { fileName: string; fileType: string; fileData: string }) => boolean;
 };
 
 export type MinimalEditorRef = {
@@ -79,11 +80,14 @@ const normalizeSearchText = (text: string): string =>
     .trim();
 
 const MinimalEditor = forwardRef<MinimalEditorRef, Props>(function CustomEditorForwardRef(
-  { initialData, disable = false }: Props,
+  { initialData, disable = false, onAttachmentClick }: Props,
   ref
 ) {
   const editorRef = useRef<BalloonEditor>();
   const detachLinkOpeningRef = useRef<(() => void) | null>(null);
+  const detachAttachmentClickRef = useRef<(() => void) | null>(null);
+  const onAttachmentClickRef = useRef(onAttachmentClick);
+  onAttachmentClickRef.current = onAttachmentClick;
   const fileAttachmentPluginRef =
     useRef<FileAttachmentPlugin | undefined>(undefined);
 
@@ -302,10 +306,28 @@ const MinimalEditor = forwardRef<MinimalEditorRef, Props>(function CustomEditorF
           ) as FileAttachmentPlugin;
           // Alt+Enter / Ctrl|Cmd+click must never open javascript:/data: links (review H1)
           detachLinkOpeningRef.current = attachSafeLinkOpening(editor);
+
+          const editable = editor.ui.getEditableElement();
+          if (editable) {
+            const handleClick = (event: MouseEvent) => {
+              const el = (event.target as HTMLElement | null)?.closest(".ck-attachment-widget") as HTMLElement | null;
+              const fileData = el?.getAttribute("data-file-data");
+              if (!el || !fileData) return;
+              onAttachmentClickRef.current?.({
+                fileName: el.getAttribute("data-file-name") || "attachment",
+                fileType: el.getAttribute("data-file-type") || "",
+                fileData,
+              });
+            };
+            editable.addEventListener("click", handleClick);
+            detachAttachmentClickRef.current = () => editable.removeEventListener("click", handleClick);
+          }
         }}
         onAfterDestroy={() => {
           detachLinkOpeningRef.current?.();
           detachLinkOpeningRef.current = null;
+          detachAttachmentClickRef.current?.();
+          detachAttachmentClickRef.current = null;
         }}
       />
     </WrapperStl>

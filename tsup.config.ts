@@ -1,5 +1,8 @@
 import { defineConfig } from "tsup";
 
+// `npm run dev` (watch for local development): no .d.ts (slow, and the apps' bundlers do not need them) and no clean.
+const dev = process.env.SHARED_UI_DEV === "1";
+
 export default defineConfig({
   entry: {
     index: "src/index.ts",
@@ -18,10 +21,10 @@ export default defineConfig({
     "file-viewer": "src/file-viewer/index.ts",
   },
   format: ["esm", "cjs"],
-  dts: true,
+  dts: !dev,
   splitting: true,
   sourcemap: true,
-  clean: true,
+  clean: !dev,
   treeshake: true,
   // The entry-local stylesheet (editor attachment widget) is injected by the JS; third-party css stays an external import.
   injectStyle: true,

@@ -74,6 +74,8 @@ export { default as GivebackAction } from "./detail/actions/GivebackAction";
 export { default as CancelAction } from "./detail/actions/CancelAction";
 export { default as ShareAction } from "./detail/actions/ShareAction";
 export { default as CopyTitleAction } from "./detail/actions/CopyTitleAction";
+export { default as DocumentAttachmentPreview } from "./components/DocumentAttachmentPreview";
+export { default as AttachmentPreviewModal } from "./components/AttachmentPreviewModal";
 export { default as AttachmentsSection } from "./detail/sections/AttachmentsSection";
 export { default as SectionView } from "./detail/sections/SectionView";
 export { default as ReferenceLinksSection } from "./detail/sections/ReferenceLinksSection";

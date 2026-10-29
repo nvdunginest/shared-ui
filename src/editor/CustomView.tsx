@@ -37,18 +37,23 @@ import {
 import styled from "styled-components";
 
 import "ckeditor5/ckeditor5.css";
-import "./plugins/attachment-widget.css";
 
 import FileAttachmentPlugin from "./plugins";
 import { attachSafeLinkOpening } from "./safeLinkOpening";
 
 const DATA_URL_PREFIX = "data:";
 
+export type AttachmentClick = { fileName: string; fileType: string; fileData: string };
+
 type Props = {
   data?: string | Record<string, string>;
+  /** Called when an attached file is clicked; return true when it was handled (else the file is downloaded). */
+  onAttachmentClick?: (attachment: AttachmentClick) => boolean;
 };
 
-const CustomView = ({ data }: Props) => {
+const CustomView = ({ data, onAttachmentClick }: Props) => {
+  const onAttachmentClickRef = useRef(onAttachmentClick);
+  onAttachmentClickRef.current = onAttachmentClick;
   const editorRef = useRef<InlineEditor>();
   const detachAttachmentClickRef = useRef<(() => void) | null>(null);
   const detachLinkOpeningRef = useRef<(() => void) | null>(null);
@@ -156,6 +161,9 @@ const CustomView = ({ data }: Props) => {
 
             const fileName =
               attachmentEl.getAttribute("data-file-name") || "attachment";
+            const fileType = attachmentEl.getAttribute("data-file-type") || "";
+
+            if (onAttachmentClickRef.current?.({ fileName, fileType, fileData })) return;
 
             const downloadLink = document.createElement("a");
             downloadLink.href = fileData;

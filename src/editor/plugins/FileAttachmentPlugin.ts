@@ -1,4 +1,6 @@
-import { ButtonView, Command, Plugin } from "ckeditor5";
+import { ButtonView, Command, Plugin, toWidget } from "ckeditor5";
+
+import { ensureAttachmentWidgetStyle } from "./attachmentWidgetStyle";
 
 export type AttachmentData = {
   fileName: string;
@@ -21,6 +23,7 @@ export default class FileAttachmentPlugin extends Plugin {
 
   init() {
     const editor = this.editor;
+    ensureAttachmentWidgetStyle();
 
     editor.commands.add(
       "fileAttachment",
@@ -87,7 +90,7 @@ export default class FileAttachmentPlugin extends Plugin {
         if (!data) return writer.createText("");
 
         const container = writer.createContainerElement("span", {
-          class: "ck-attachment-widget ck-widget",
+          class: "ck-attachment-widget",
           "data-attachment-id": attachmentId,
           "data-file-name": data.fileName,
           "data-file-size": data.fileSize,
@@ -95,25 +98,25 @@ export default class FileAttachmentPlugin extends Plugin {
           "data-file-data": data.fileData,
         });
 
-        const icon = writer.createEmptyElement("span", {
-          class: "ck-attachment-icon",
-        });
-
-        const info = writer.createContainerElement("span", {
-          class: "ck-attachment-info",
-        });
-
-        const nameEl = writer.createText(data.fileName);
-        const sizeEl = writer.createText(
-          ` (${this.formatFileSize(data.fileSize)})`,
+        // The inner parts are UI elements (rendered straight to the DOM, not mapped to the model): the
+        // model attachment has no content, so a selection inside them would be out of bounds and CKEditor
+        // would throw and restart (the click never reached the file).
+        const icon = writer.createUIElement("span", { class: "ck-attachment-icon" });
+        const label = `${data.fileName} (${this.formatFileSize(data.fileSize)})`;
+        const info = writer.createUIElement(
+          "span",
+          { class: "ck-attachment-info" },
+          function (this: any, domDocument: Document) {
+            const dom = this.toDomElement(domDocument) as HTMLElement;
+            dom.textContent = label;
+            return dom;
+          },
         );
 
-        writer.insert(writer.createPositionAt(info, 0), nameEl);
-        writer.insert(writer.createPositionAt(info, "end"), sizeEl);
         writer.insert(writer.createPositionAt(container, 0), icon);
         writer.insert(writer.createPositionAt(container, "end"), info);
 
-        return container;
+        return toWidget(container, writer, { label: data.fileName });
       },
     });
 

@@ -9,6 +9,7 @@ import {
 import { useDocumentContext } from "../../../context/document/index";
 import activitiesController from "../../../api/activities.controller";
 import IActivity from "../../../models/IActivity";
+import { useCommentAttachmentPreview } from "../../../components/useCommentAttachmentPreview";
 import type { MinimalEditorRef } from "../../../../editor";
 import { extractApiErrorMessage } from "../../../helpers/apiError.helper";
 import { getUiConfig } from "../../../../ui";
@@ -64,6 +65,7 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
   const isPrivate = isFinished || isPrivateInput;
 
   const ref = useRef<MinimalEditorRef>(null);
+  const { onAttachmentClick, modal } = useCommentAttachmentPreview();
 
   const attachFromMinimalButton = () => {
     ref.current?.openAttachmentDialog();
@@ -115,7 +117,8 @@ export default function CommentAction({ parentComment, onPosted }: Props): JSX.E
     <ContainerStl>
       <WrapperStl>
         <Suspense fallback={<Skeleton.Input active block size="large" />}>
-          <MinimalEditor disable={loading} initialData="" ref={ref} />
+          <MinimalEditor disable={loading} initialData="" ref={ref} onAttachmentClick={onAttachmentClick} />
+          {modal}
         </Suspense>
         <div style={{ padding: "4px", display: "flex", flexDirection: "row" }}>
           <Button

@@ -85,6 +85,7 @@
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
+    "dev": "SHARED_UI_DEV=1 tsup --watch",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "check:exports": "node scripts/check-exports.mjs",
